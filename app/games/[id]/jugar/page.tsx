@@ -11,7 +11,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/juegos/[id]/jugar">): Promise<Metadata> {
+}: PageProps<"/games/[id]/jugar">): Promise<Metadata> {
   const { id } = await params;
   const game = getGame(id);
   if (!game) return { title: "404 | Arcade Vault" };
@@ -20,7 +20,7 @@ export async function generateMetadata({
 
 export default function PlayPage({
   params,
-}: PageProps<"/juegos/[id]/jugar">) {
+}: PageProps<"/games/[id]/jugar">) {
   return (
     <Suspense fallback={<PageLoading />}>
       <Player params={params} />
@@ -30,7 +30,7 @@ export default function PlayPage({
 
 async function Player({
   params,
-}: Pick<PageProps<"/juegos/[id]/jugar">, "params">) {
+}: Pick<PageProps<"/games/[id]/jugar">, "params">) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();

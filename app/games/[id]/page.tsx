@@ -12,7 +12,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/juegos/[id]">): Promise<Metadata> {
+}: PageProps<"/games/[id]">): Promise<Metadata> {
   const { id } = await params;
   const game = getGame(id);
   if (!game) return { title: "404 | Arcade Vault" };
@@ -21,7 +21,7 @@ export async function generateMetadata({
 
 export default function GameDetailPage({
   params,
-}: PageProps<"/juegos/[id]">) {
+}: PageProps<"/games/[id]">) {
   return (
     <Suspense fallback={<PageLoading />}>
       <GameDetail params={params} />
@@ -31,7 +31,7 @@ export default function GameDetailPage({
 
 async function GameDetail({
   params,
-}: Pick<PageProps<"/juegos/[id]">, "params">) {
+}: Pick<PageProps<"/games/[id]">, "params">) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();
@@ -72,7 +72,7 @@ async function GameDetail({
             </div>
           </div>
           <div className="detail-actions">
-            <Link href={`/juegos/${game.id}/jugar`} className="btn xl pulse">
+            <Link href={`/games/${game.id}/jugar`} className="btn xl pulse">
               ▶ JUGAR AHORA
             </Link>
             <Link href="/" className="btn ghost lg">

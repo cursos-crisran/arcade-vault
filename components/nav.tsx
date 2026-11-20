@@ -10,7 +10,7 @@ export function Nav() {
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const libraryActive = pathname === "/" || pathname.startsWith("/juegos");
+  const libraryActive = pathname === "/" || pathname.startsWith("/games");
   const hallActive = pathname.startsWith("/salon");
   const authActive = pathname.startsWith("/auth");
   const close = () => setOpen(false);
