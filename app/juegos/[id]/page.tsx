@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { PageLoading } from "@/components/page-loading";
 import { GAMES, getGame } from "@/lib/games";
 import { seededScores } from "@/lib/scores";
 
@@ -17,9 +19,19 @@ export async function generateMetadata({
   return { title: `${game.title} | Arcade Vault`, description: game.short };
 }
 
-export default async function GameDetailPage({
+export default function GameDetailPage({
   params,
 }: PageProps<"/juegos/[id]">) {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <GameDetail params={params} />
+    </Suspense>
+  );
+}
+
+async function GameDetail({
+  params,
+}: Pick<PageProps<"/juegos/[id]">, "params">) {
   const { id } = await params;
   const game = getGame(id);
   if (!game) notFound();
