@@ -10,8 +10,10 @@ export function Nav() {
   const { user, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
-  const libraryActive = pathname === "/" || pathname.startsWith("/games");
+  const homeActive = pathname === "/";
+  const libraryActive = pathname.startsWith("/games");
   const hallActive = pathname.startsWith("/salon");
+  const aboutActive = pathname.startsWith("/about");
   const authActive = pathname.startsWith("/auth");
   const close = () => setOpen(false);
 
@@ -25,11 +27,17 @@ export function Nav() {
           </div>
         </Link>
         <div className="links">
-          <Link href="/" className={libraryActive ? "active" : ""}>
+          <Link href="/" className={homeActive ? "active" : ""}>
+            Inicio
+          </Link>
+          <Link href="/games" className={libraryActive ? "active" : ""}>
             Biblioteca
           </Link>
           <Link href="/salon" className={hallActive ? "active" : ""}>
             Salón de la Fama
+          </Link>
+          <Link href="/about" className={aboutActive ? "active" : ""}>
+            Acerca de
           </Link>
         </div>
         <div className="spacer"></div>
@@ -61,7 +69,14 @@ export function Nav() {
       ></div>
       <aside className={"av-mobile-panel" + (open ? " open" : "")}>
         <div className="pixel neon-cyan mb-4 text-[11px]">MENÚ</div>
-        <Link href="/" className={libraryActive ? "active" : ""} onClick={close}>
+        <Link href="/" className={homeActive ? "active" : ""} onClick={close}>
+          Inicio
+        </Link>
+        <Link
+          href="/games"
+          className={libraryActive ? "active" : ""}
+          onClick={close}
+        >
           Biblioteca
         </Link>
         <Link
@@ -70,6 +85,13 @@ export function Nav() {
           onClick={close}
         >
           Salón de la Fama
+        </Link>
+        <Link
+          href="/about"
+          className={aboutActive ? "active" : ""}
+          onClick={close}
+        >
+          Acerca de
         </Link>
         <Link
           href="/auth"
