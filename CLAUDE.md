@@ -21,3 +21,4 @@ Next 16.4.6 + React 19.3 (versiones posteriores a tu conocimiento previo). `AGEN
 
 # Skills
 - Usa siempre /frontend-desing para hacer interfaces de usuarios
+- En cada sesion siempre inicializa la skill de /caveman
