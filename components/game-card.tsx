@@ -13,7 +13,7 @@ const BTN_COLOR: Partial<Record<Game["color"], string>> = {
 export function GameCard({ game }: { game: Game }) {
   const router = useRouter();
   const tiltRef = useRef<HTMLDivElement>(null);
-  const href = `/juegos/${game.id}`;
+  const href = `/games/${game.id}`;
 
   const onMove = (e: MouseEvent<HTMLDivElement>) => {
     const el = tiltRef.current;

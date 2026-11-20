@@ -19,7 +19,7 @@ export default function NotFound() {
       <div className="pixel mt-6 text-[10px] tracking-[0.2em] text-[var(--yellow)]">
         CONTINUAR? <span className="blink">_</span>
       </div>
-      <Link href="/" className="btn xl pulse mt-10">
+      <Link href="/games" className="btn xl pulse mt-10">
         VOLVER AL VAULT
       </Link>
     </div>
