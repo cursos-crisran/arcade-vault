@@ -1,6 +1,6 @@
 # SPEC 02 — Home en `/`, biblioteca en `/games` y nuevo Nav
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-11-20
 > **Objective:** Mover la biblioteca a `/games` (con detalle y reproductor bajo la misma raíz), portar el home de `references/templates/home-about/` a `/` y actualizar el Nav a Inicio, Biblioteca, Salón de la Fama y Acerca de.
