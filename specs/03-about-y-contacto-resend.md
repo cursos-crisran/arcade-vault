@@ -1,6 +1,6 @@
 # SPEC 03 — Página "Acerca de" y envío del formulario de contacto con Resend
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 02
 > **Date:** 2026-11-20
 > **Objective:** Reemplazar el placeholder de `/about` por la página "Acerca de" + "Contacto" de `references/templates/home-about/about.jsx`, y enviar el formulario de contacto por correo con Resend mediante una Server Action.
@@ -115,26 +115,26 @@ Antes de empezar, leer en `node_modules/next/dist/docs/01-app`: `02-guides/forms
 
 ## Acceptance criteria
 
-- [ ] `bun run build` y `bun run lint` terminan sin errores.
-- [ ] `/about` muestra el kicker "▸ ACERCA DE", el título "ACERCA DE ARCADE VAULT", el párrafo de misión y 3 highlights con los textos de la plantilla.
-- [ ] `/about` muestra el divisor de píxeles (24 cuadros) y la sección "▸ CONTACTO" con el título "CONTÁCTANOS", el texto de intro y los 3 tips.
-- [ ] El highlight "HECHO CON ❤️ PARA JUGADORES" usa la clase `magenta`, "JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR" usa `cyan` y "PROYECTO EN CONSTANTE CRECIMIENTO" usa `green`.
-- [ ] Las secciones con clase `reveal` reciben la clase `in` al entrar en el viewport, también en `/`.
-- [ ] El formulario tiene los campos NOMBRE, CORREO ELECTRÓNICO y MENSAJE con los placeholders de la plantilla, y el botón "▶  ENVIAR MENSAJE".
-- [ ] Con datos válidos y variables de entorno correctas, llega un correo a `CONTACT_TO_EMAIL` con asunto `[Arcade Vault] Mensaje de <name>`, el nombre, el correo y el mensaje en el cuerpo, y `Reply-To` igual al correo del visitante.
-- [ ] Tras el envío exitoso aparece el terminal "VAULT-OS // TERMINAL" con "MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS, <NOMBRE EN MAYÚSCULAS>.".
-- [ ] "ENVIAR OTRO MENSAJE" vuelve al formulario con los tres campos vacíos.
-- [ ] Mientras se envía, el botón está deshabilitado y dice "ENVIANDO…". No se puede enviar dos veces.
-- [ ] Enviar con cualquier campo vacío (o solo espacios) no envía correo, aplica la animación `shake` y muestra un aviso de error con los valores escritos conservados.
-- [ ] Enviar un correo sin formato válido (por ejemplo `abc`) no envía correo y muestra un error en el campo de correo.
-- [ ] Un mensaje de más de 2000 caracteres no envía correo y muestra un error.
-- [ ] Con el campo oculto `website` lleno, la UI muestra el éxito pero Resend no recibe ninguna llamada.
-- [ ] Con `RESEND_API_KEY` ausente o inválida, el formulario muestra el aviso de error, conserva lo escrito y permite reintentar. El mensaje al usuario no revela la causa ni la clave.
-- [ ] `RESEND_API_KEY` no aparece en el bundle del cliente (`grep -r "re_" .next/static` sin resultados).
-- [ ] El campo `website` no es visible ni accesible con teclado (`tabIndex={-1}`, `aria-hidden`, `autoComplete="off"`).
-- [ ] La consola del navegador no muestra errores ni warnings de React en `/about`, ni en `/` tras extraer `useReveal`.
-- [ ] A 375 px de ancho `/about` se ve en una columna sin desbordar horizontalmente.
-- [ ] `.env.example` existe, lista las tres variables vacías y está versionado. `.env.local` no.
+- [X] `bun run build` y `bun run lint` terminan sin errores.
+- [X] `/about` muestra el kicker "▸ ACERCA DE", el título "ACERCA DE ARCADE VAULT", el párrafo de misión y 3 highlights con los textos de la plantilla.
+- [X] `/about` muestra el divisor de píxeles (24 cuadros) y la sección "▸ CONTACTO" con el título "CONTÁCTANOS", el texto de intro y los 3 tips.
+- [X] El highlight "HECHO CON ❤️ PARA JUGADORES" usa la clase `magenta`, "JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR" usa `cyan` y "PROYECTO EN CONSTANTE CRECIMIENTO" usa `green`.
+- [X] Las secciones con clase `reveal` reciben la clase `in` al entrar en el viewport, también en `/`.
+- [X] El formulario tiene los campos NOMBRE, CORREO ELECTRÓNICO y MENSAJE con los placeholders de la plantilla, y el botón "▶  ENVIAR MENSAJE".
+- [X] Con datos válidos y variables de entorno correctas, llega un correo a `CONTACT_TO_EMAIL` con asunto `[Arcade Vault] Mensaje de <name>`, el nombre, el correo y el mensaje en el cuerpo, y `Reply-To` igual al correo del visitante.
+- [X] Tras el envío exitoso aparece el terminal "VAULT-OS // TERMINAL" con "MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS, <NOMBRE EN MAYÚSCULAS>.".
+- [X] "ENVIAR OTRO MENSAJE" vuelve al formulario con los tres campos vacíos.
+- [X] Mientras se envía, el botón está deshabilitado y dice "ENVIANDO…". No se puede enviar dos veces.
+- [X] Enviar con cualquier campo vacío (o solo espacios) no envía correo, aplica la animación `shake` y muestra un aviso de error con los valores escritos conservados.
+- [X] Enviar un correo sin formato válido (por ejemplo `abc`) no envía correo y muestra un error en el campo de correo.
+- [X] Un mensaje de más de 2000 caracteres no envía correo y muestra un error.
+- [X] Con el campo oculto `website` lleno, la UI muestra el éxito pero Resend no recibe ninguna llamada.
+- [X] Con `RESEND_API_KEY` ausente o inválida, el formulario muestra el aviso de error, conserva lo escrito y permite reintentar. El mensaje al usuario no revela la causa ni la clave.
+- [X] `RESEND_API_KEY` no aparece en el bundle del cliente (`grep -r "re_" .next/static` sin resultados).
+- [X] El campo `website` no es visible ni accesible con teclado (`tabIndex={-1}`, `aria-hidden`, `autoComplete="off"`).
+- [X] La consola del navegador no muestra errores ni warnings de React en `/about`, ni en `/` tras extraer `useReveal`.
+- [X] A 375 px de ancho `/about` se ve en una columna sin desbordar horizontalmente.
+- [X] `.env.example` existe, lista las tres variables vacías y está versionado. `.env.local` no.
 
 ---
 
