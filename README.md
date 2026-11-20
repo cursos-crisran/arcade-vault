@@ -13,3 +13,14 @@ Sigue las buenas prácticas recomendadas en [Fernando Skills](https://github.com
 ```bash
 npx skills@latest add Klerith/fernando-skills
 ```
+
+## Comandos
+
+Gestor de paquetes: **bun** (`bun.lock`).
+
+- `bun dev` — servidor de desarrollo (`next dev`)
+- `bun run build` — build de producción
+- `bun start` — sirve el build
+- `bun run lint` — ESLint (flat config, `eslint.config.mjs`)
+
+No hay framework de tests configurado todavía.
