@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { GAME_ENGINES } from "@/games/registry";
+import type { GameEngine } from "@/games/types";
 import type { Game } from "@/lib/games";
 
 const LIVES = 3;
@@ -24,25 +26,81 @@ export function GamePlayer({ game }: { game: Game }) {
   const [over, setOver] = useState(false);
   const [nameInput, setNameInput] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [engineLives, setEngineLives] = useState(LIVES);
+  const [engineLevel, setEngineLevel] = useState(1);
+  const [ready, setReady] = useState(false);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const engineRef = useRef<GameEngine | null>(null);
+
+  // Con motor real, vidas y nivel vienen del canvas; con el simulador, no.
+  const hasEngine = game.id in GAME_ENGINES;
+  const lives = hasEngine ? engineLives : LIVES;
+  const level = hasEngine ? engineLevel : Math.floor(score / 2500) + 1;
 
   // El nombre sigue a la sesión hasta que el jugador lo edita en el modal.
   const name = nameInput ?? user?.name ?? "INVITADO";
-  const level = Math.floor(score / 2500) + 1;
 
+  // Motor real: se carga solo en el cliente y se destruye al salir.
   useEffect(() => {
-    if (over || paused) return;
+    if (!hasEngine) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let cancelled = false;
+    let engine: GameEngine | null = null;
+
+    GAME_ENGINES[game.id]().then(({ createGame }) => {
+      if (cancelled) return;
+      engine = createGame(canvas, {
+        onScore: setScore,
+        onLives: setEngineLives,
+        onLevel: setEngineLevel,
+        onGameOver: (result) => {
+          setScore(result.score);
+          setEngineLevel(result.level);
+          setOver(true);
+        },
+      });
+      engineRef.current = engine;
+      setReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+      engine?.destroy();
+      engineRef.current = null;
+    };
+  }, [game.id, hasEngine]);
+
+  // Simulador mock para los juegos sin motor.
+  useEffect(() => {
+    if (hasEngine || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [hasEngine, over, paused]);
+
+  const togglePause = () => {
+    const next = !paused;
+    setPaused(next);
+    if (next) engineRef.current?.pause();
+    else engineRef.current?.resume();
+  };
+
+  const finish = () => {
+    setOver(true);
+    engineRef.current?.pause();
+  };
 
   const restart = () => {
     setScore(0);
     setPaused(false);
     setOver(false);
     setSaved(false);
+    engineRef.current?.restart();
   };
 
   return (
@@ -59,7 +117,7 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat lives">
             <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(LIVES).trim() || "—"}</div>
+            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
@@ -67,10 +125,10 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         <div className="hud-actions">
-          <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
+          <button className="btn yellow" onClick={togglePause}>
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
-          <button className="btn magenta" onClick={() => setOver(true)}>
+          <button className="btn magenta" onClick={finish}>
             FIN
           </button>
           <Link href={`/games/${game.id}`} className="btn ghost">
@@ -81,13 +139,25 @@ export function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {hasEngine ? (
+            <>
+              <canvas
+                ref={canvasRef}
+                width={800}
+                height={600}
+                className="block h-full w-full"
+              />
+              {!ready && <div className="crt-content">CARGANDO</div>}
+            </>
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
             <div className="crt-content z-[5] bg-black/60">
               <div>
