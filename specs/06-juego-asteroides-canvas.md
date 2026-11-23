@@ -1,6 +1,6 @@
 # SPEC 06 — Juego ASTEROIDES en canvas con ruta genérica por juego
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 02
 > **Date:** 2026-11-23
 > **Objective:** Portar el juego de `references/started-games/02-asteroids` a un motor de canvas en TypeScript, montado por un `GamePlayer` genérico que se comunica con React mediante eventos (puntaje, vidas, nivel, fin de juego) y que deja cada juego aislado en su propia carpeta.
