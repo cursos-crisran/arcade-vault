@@ -2,30 +2,32 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { submitScore } from "@/app/games/actions";
 import { useAuth } from "@/components/auth-provider";
 import { GAME_ENGINES } from "@/games/registry";
 import type { GameEngine } from "@/games/types";
 import type { Game } from "@/lib/games";
 
 const LIVES = 3;
-const SCORE_KEY = "av_scores";
 
-function saveScore(entry: { game: string; score: number; name: string }) {
-  try {
-    const raw = localStorage.getItem(SCORE_KEY);
-    const all: unknown[] = raw ? JSON.parse(raw) : [];
-    all.push({ ...entry, at: Date.now() });
-    localStorage.setItem(SCORE_KEY, JSON.stringify(all));
-  } catch {}
-}
+type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-export function GamePlayer({ game }: { game: Game }) {
+// `persistScores` es true solo para juegos con fila en `games` (reales).
+// Los juegos mock no guardan nada.
+export function GamePlayer({
+  game,
+  persistScores,
+}: {
+  game: Game;
+  persistScores: boolean;
+}) {
   const { user } = useAuth();
   const [score, setScore] = useState(0);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [nameInput, setNameInput] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [saveError, setSaveError] = useState("");
   const [engineLives, setEngineLives] = useState(LIVES);
   const [engineLevel, setEngineLevel] = useState(1);
   const [ready, setReady] = useState(false);
@@ -99,8 +101,26 @@ export function GamePlayer({ game }: { game: Game }) {
     setScore(0);
     setPaused(false);
     setOver(false);
-    setSaved(false);
+    setSaveStatus("idle");
+    setSaveError("");
     engineRef.current?.restart();
+  };
+
+  const save = async () => {
+    if (saveStatus === "saving" || saveStatus === "saved") return;
+    setSaveStatus("saving");
+    setSaveError("");
+    const result = await submitScore({
+      gameId: game.id,
+      playerName: name,
+      score,
+    });
+    if (result.ok) {
+      setSaveStatus("saved");
+    } else {
+      setSaveStatus("error");
+      setSaveError(result.error);
+    }
   };
 
   return (
@@ -182,25 +202,42 @@ export function GamePlayer({ game }: { game: Game }) {
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!saved ? (
-              <div className="input-row">
-                <input
-                  value={name}
-                  onChange={(e) =>
-                    setNameInput(e.target.value.toUpperCase().slice(0, 10))
-                  }
-                  placeholder="TUS INICIALES"
-                />
-                <button
-                  className="btn yellow"
-                  onClick={() => {
-                    saveScore({ game: game.id, score, name });
-                    setSaved(true);
-                  }}
-                >
-                  GUARDAR PUNTUACIÓN
-                </button>
+            {!persistScores ? (
+              <div className="mono mb-4 text-[11px] tracking-[0.16em] text-[var(--ink-dim)]">
+                MODO DEMO · ESTE JUEGO AÚN NO GUARDA PUNTUACIONES
               </div>
+            ) : saveStatus !== "saved" ? (
+              <>
+                <div className="input-row">
+                  <input
+                    value={name}
+                    disabled={saveStatus === "saving"}
+                    onChange={(e) =>
+                      setNameInput(e.target.value.toUpperCase().slice(0, 10))
+                    }
+                    placeholder="TUS INICIALES"
+                  />
+                  <button
+                    className="btn yellow"
+                    disabled={saveStatus === "saving"}
+                    onClick={save}
+                  >
+                    {saveStatus === "saving"
+                      ? "GUARDANDO…"
+                      : saveStatus === "error"
+                        ? "REINTENTAR"
+                        : "GUARDAR PUNTUACIÓN"}
+                  </button>
+                </div>
+                {saveStatus === "error" && (
+                  <div
+                    role="alert"
+                    className="mono mt-2 text-[11px] tracking-[0.16em] text-[var(--magenta)]"
+                  >
+                    ✕ {saveError}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
             )}
