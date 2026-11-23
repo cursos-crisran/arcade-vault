@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { GamePlayer } from "@/components/game-player";
 import { PageLoading } from "@/components/page-loading";
 import { GAMES, getGame } from "@/lib/games";
+import { getRealGameIds } from "@/lib/leaderboard";
 
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
@@ -35,5 +36,7 @@ async function Player({
   const game = getGame(id);
   if (!game) notFound();
 
-  return <GamePlayer game={game} />;
+  const realGameIds = await getRealGameIds();
+
+  return <GamePlayer game={game} persistScores={realGameIds.includes(id)} />;
 }
