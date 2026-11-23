@@ -5,4 +5,5 @@ export const GAME_ENGINES: Record<
   () => Promise<{ createGame: CreateGame }>
 > = {
   asteroides: () => import("./asteroides"),
+  tetris: () => import("./tetris"),
 };
