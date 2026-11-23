@@ -1,0 +1,21 @@
+export const W = 800;
+export const H = 600;
+export const PADDLE_SPEED = 400; // px/s
+export const PADDLE = { y: 560, w: 81, h: 14 }; // sprite de 162×14 escalado a 81×14
+export const BALL_SIZE = 16;
+export const BASE_BALL_VX = 200;
+export const BASE_BALL_VY = -300; // multiplicados por LEVELS[n].speed
+export const BLOCK_COLS = 10;
+export const BLOCK_W = 64;
+export const BLOCK_H = 24;
+export const BLOCKS_ORIGIN_X = 80; // (800 - 10 * 64) / 2
+export const BLOCKS_ORIGIN_Y = 80;
+export const BLOCK_POINTS = 10;
+export const LIVES = 3;
+export const MAX_LEVEL = 5;
+export const EXPLOSION_DURATION = 150; // ms, 4 frames
+export const MAX_DT = 0.05; // s
+
+export const SPRITESHEET_SRC = "/games/arkanoid/spritesheet-breakout.png";
+export const SOUND_BOUNCE_SRC = "/games/arkanoid/sounds/ball-bounce.mp3";
+export const SOUND_BREAK_SRC = "/games/arkanoid/sounds/break-sound.mp3";
