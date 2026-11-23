@@ -36,6 +36,5 @@ async function Player({
   const game = getGame(id);
   if (!game || !(await isFunctionalGame(id))) notFound();
 
-  // `persistScores` se elimina en el Paso 6 (GamePlayer).
-  return <GamePlayer game={game} persistScores />;
+  return <GamePlayer game={game} />;
 }
