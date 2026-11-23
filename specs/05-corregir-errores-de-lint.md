@@ -1,6 +1,6 @@
 # SPEC 05 — Corregir los errores de lint excluyendo `references/`
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 04
 > **Date:** 2026-11-23
 > **Objective:** Dejar `bun run lint` en 0 errores y 0 warnings excluyendo `references/` del análisis de ESLint, sin tocar el código de la app.

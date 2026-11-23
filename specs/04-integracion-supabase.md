@@ -1,6 +1,6 @@
 # SPEC 04 — Integración base de Supabase (clientes SSR, proxy y tipos)
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 03
 > **Date:** 2026-11-23
 > **Objective:** Dejar Supabase integrado en la app Next.js (clientes de navegador y servidor con `@supabase/ssr`, `proxy.ts` que refresca la sesión, tipos generados y carpeta `supabase/` enlazada al proyecto remoto) sin implementar ninguna función de producto.
