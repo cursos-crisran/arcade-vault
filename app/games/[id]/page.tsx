@@ -2,8 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { LeaderboardList, toScoreRows } from "@/components/leaderboard-list";
 import { PageLoading } from "@/components/page-loading";
 import { GAMES, getGame } from "@/lib/games";
+import {
+  GAME_TOP_N,
+  getGameLeaderboard,
+  getRealGameIds,
+} from "@/lib/leaderboard";
 import { seededScores } from "@/lib/scores";
 
 export function generateStaticParams() {
@@ -36,7 +42,11 @@ async function GameDetail({
   const game = getGame(id);
   if (!game) notFound();
 
-  const scores = seededScores(id.length * 17 + 3, 10);
+  // Juegos reales (con fila en `games`) leen de Supabase; los mock, seededScores.
+  const realGameIds = await getRealGameIds();
+  const scores = realGameIds.includes(id)
+    ? toScoreRows(await getGameLeaderboard(id, GAME_TOP_N))
+    : seededScores(id.length * 17 + 3, GAME_TOP_N);
 
   return (
     <div className="av-detail fade-in">
@@ -83,27 +93,7 @@ async function GameDetail({
       </div>
 
       <aside>
-        <div className="leaderboard">
-          <h3>MEJORES PUNTUACIONES</h3>
-          {scores.map((r, i) => (
-            <div
-              key={r.name}
-              className={
-                "lb-row" +
-                (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
-              }
-            >
-              <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
-              <div className="pl">
-                {r.name}
-                <div className="text-[10px] tracking-[0.1em] text-[var(--ink-faint)]">
-                  {r.date}
-                </div>
-              </div>
-              <div className="sc">{r.score.toLocaleString("es-ES")}</div>
-            </div>
-          ))}
-        </div>
+        <LeaderboardList rows={scores} />
       </aside>
     </div>
   );
