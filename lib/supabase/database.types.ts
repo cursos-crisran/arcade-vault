@@ -27,13 +27,101 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            [_ in never]: never
+            games: {
+              Row: {
+                created_at: string
+                id: string
+                title: string
+              }
+              Insert: {
+                created_at?: string
+                id: string
+                title: string
+              }
+              Update: {
+                created_at?: string
+                id?: string
+                title?: string
+              }
+              Relationships: []
+            }
+            scores: {
+              Row: {
+                created_at: string
+                game_id: string
+                id: string
+                player_name: string
+                score: number
+                user_id: string | null
+              }
+              Insert: {
+                created_at?: string
+                game_id: string
+                id?: string
+                player_name: string
+                score: number
+                user_id?: string | null
+              }
+              Update: {
+                created_at?: string
+                game_id?: string
+                id?: string
+                player_name?: string
+                score?: number
+                user_id?: string | null
+              }
+              Relationships: [
+                {
+                  foreignKeyName: "scores_game_id_fkey"
+                  columns: ["game_id"]
+                  isOneToOne: false
+                  referencedRelation: "games"
+                  referencedColumns: ["id"]
+                },
+              ]
+            }
           }
           Views: {
-            [_ in never]: never
+            leaderboard_by_game: {
+              Row: {
+                created_at: string | null
+                game_id: string | null
+                player_name: string | null
+                score: number | null
+              }
+              Relationships: [
+                {
+                  foreignKeyName: "scores_game_id_fkey"
+                  columns: ["game_id"]
+                  isOneToOne: false
+                  referencedRelation: "games"
+                  referencedColumns: ["id"]
+                },
+              ]
+            }
+            leaderboard_global: {
+              Row: {
+                created_at: string | null
+                game_id: string | null
+                player_name: string | null
+                score: number | null
+              }
+              Relationships: [
+                {
+                  foreignKeyName: "scores_game_id_fkey"
+                  columns: ["game_id"]
+                  isOneToOne: false
+                  referencedRelation: "games"
+                  referencedColumns: ["id"]
+                },
+              ]
+            }
           }
           Functions: {
-            [_ in never]: never
+            submit_score: {
+              Args: { p_game_id: string; p_player_name: string; p_score: number }
+              Returns: undefined
+            }
           }
           Enums: {
             [_ in never]: never
