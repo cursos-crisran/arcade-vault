@@ -92,6 +92,17 @@ export const GAMES: Game[] = [
     plays: "0",
   },
   {
+    id: "tetris",
+    title: "TETRIS",
+    short: "Encaja las piezas y limpia líneas sin llegar al techo.",
+    long: "Ocho piezas descienden sobre un tablero de 10×20. Muévelas, rótalas y déjalas caer para completar líneas. Cada 10 líneas sube el nivel y la caída se acelera. Incluye una pieza extra: la tuerca.",
+    cat: "PUZZLE",
+    cover: "cover-tetris",
+    color: "magenta",
+    best: 0,
+    plays: "0",
+  },
+  {
     id: "ranaria",
     title: "RANARIA",
     short: "Cruza la autopista de pixeles.",
