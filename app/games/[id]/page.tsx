@@ -5,12 +5,8 @@ import { Suspense } from "react";
 import { LeaderboardList, toScoreRows } from "@/components/leaderboard-list";
 import { PageLoading } from "@/components/page-loading";
 import { GAMES, getGame } from "@/lib/games";
-import {
-  GAME_TOP_N,
-  getGameLeaderboard,
-  getRealGameIds,
-} from "@/lib/leaderboard";
-import { seededScores } from "@/lib/scores";
+import { isFunctionalGame } from "@/lib/functional-games";
+import { GAME_TOP_N, getGameLeaderboard } from "@/lib/leaderboard";
 
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
@@ -40,13 +36,9 @@ async function GameDetail({
 }: Pick<PageProps<"/games/[id]">, "params">) {
   const { id } = await params;
   const game = getGame(id);
-  if (!game) notFound();
+  if (!game || !(await isFunctionalGame(id))) notFound();
 
-  // Juegos reales (con fila en `games`) leen de Supabase; los mock, seededScores.
-  const realGameIds = await getRealGameIds();
-  const scores = realGameIds.includes(id)
-    ? toScoreRows(await getGameLeaderboard(id, GAME_TOP_N))
-    : seededScores(id.length * 17 + 3, GAME_TOP_N);
+  const scores = toScoreRows(await getGameLeaderboard(id, GAME_TOP_N));
 
   return (
     <div className="av-detail fade-in">

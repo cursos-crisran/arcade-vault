@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { GamePlayer } from "@/components/game-player";
 import { PageLoading } from "@/components/page-loading";
 import { GAMES, getGame } from "@/lib/games";
-import { getRealGameIds } from "@/lib/leaderboard";
+import { isFunctionalGame } from "@/lib/functional-games";
 
 export function generateStaticParams() {
   return GAMES.map((g) => ({ id: g.id }));
@@ -34,9 +34,7 @@ async function Player({
 }: Pick<PageProps<"/games/[id]/jugar">, "params">) {
   const { id } = await params;
   const game = getGame(id);
-  if (!game) notFound();
+  if (!game || !(await isFunctionalGame(id))) notFound();
 
-  const realGameIds = await getRealGameIds();
-
-  return <GamePlayer game={game} persistScores={realGameIds.includes(id)} />;
+  return <GamePlayer game={game} />;
 }

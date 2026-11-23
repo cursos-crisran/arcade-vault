@@ -12,15 +12,8 @@ const LIVES = 3;
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-// `persistScores` es true solo para juegos con fila en `games` (reales).
-// Los juegos mock no guardan nada.
-export function GamePlayer({
-  game,
-  persistScores,
-}: {
-  game: Game;
-  persistScores: boolean;
-}) {
+// Solo recibe juegos funcionales (fila en `games` y motor registrado).
+export function GamePlayer({ game }: { game: Game }) {
   const { user } = useAuth();
   const [score, setScore] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -35,17 +28,11 @@ export function GamePlayer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
 
-  // Con motor real, vidas y nivel vienen del canvas; con el simulador, no.
-  const hasEngine = game.id in GAME_ENGINES;
-  const lives = hasEngine ? engineLives : LIVES;
-  const level = hasEngine ? engineLevel : Math.floor(score / 2500) + 1;
-
   // El nombre sigue a la sesión hasta que el jugador lo edita en el modal.
   const name = nameInput ?? user?.name ?? "INVITADO";
 
-  // Motor real: se carga solo en el cliente y se destruye al salir.
+  // El motor se carga solo en el cliente y se destruye al salir.
   useEffect(() => {
-    if (!hasEngine) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -73,17 +60,7 @@ export function GamePlayer({
       engine?.destroy();
       engineRef.current = null;
     };
-  }, [game.id, hasEngine]);
-
-  // Simulador mock para los juegos sin motor.
-  useEffect(() => {
-    if (hasEngine || over || paused) return;
-    const t = setInterval(
-      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
-      220,
-    );
-    return () => clearInterval(t);
-  }, [hasEngine, over, paused]);
+  }, [game.id]);
 
   const togglePause = () => {
     const next = !paused;
@@ -137,11 +114,11 @@ export function GamePlayer({
           </div>
           <div className="hud-stat lives">
             <div className="l">Vidas</div>
-            <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+            <div className="v">{"♥ ".repeat(engineLives).trim() || "—"}</div>
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
-            <div className="v">{String(level).padStart(2, "0")}</div>
+            <div className="v">{String(engineLevel).padStart(2, "0")}</div>
           </div>
         </div>
         <div className="hud-actions">
@@ -159,25 +136,13 @@ export function GamePlayer({
 
       <div className="crt">
         <div className="crt-screen">
-          {hasEngine ? (
-            <>
-              <canvas
-                ref={canvasRef}
-                width={800}
-                height={600}
-                className="block h-full w-full"
-              />
-              {!ready && <div className="crt-content">CARGANDO</div>}
-            </>
-          ) : (
-            <div className="game-arena">
-              <div className="grid-floor"></div>
-              <div className="enemy e1"></div>
-              <div className="enemy e2"></div>
-              <div className="enemy e3"></div>
-              <div className="player-ship"></div>
-            </div>
-          )}
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="block h-full w-full"
+          />
+          {!ready && <div className="crt-content">CARGANDO</div>}
           {paused && (
             <div className="crt-content z-[5] bg-black/60">
               <div>
@@ -202,11 +167,7 @@ export function GamePlayer({
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
             <div className="final">{score.toLocaleString("es-ES")}</div>
-            {!persistScores ? (
-              <div className="mono mb-4 text-[11px] tracking-[0.16em] text-[var(--ink-dim)]">
-                MODO DEMO · ESTE JUEGO AÚN NO GUARDA PUNTUACIONES
-              </div>
-            ) : saveStatus !== "saved" ? (
+            {saveStatus !== "saved" ? (
               <>
                 <div className="input-row">
                   <input
