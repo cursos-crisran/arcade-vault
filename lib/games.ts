@@ -103,6 +103,17 @@ export const GAMES: Game[] = [
     plays: "0",
   },
   {
+    id: "arkanoid",
+    title: "ARKANOID",
+    short: "Rompe 5 muros de bloques con una pelota que no deja de acelerar.",
+    long: "Mueve la paleta con las flechas o el ratón y rebota la pelota para derribar cinco muros de bloques de colores. Cada nivel cambia el patrón y acelera la pelota. Tienes 3 vidas: si la pelota cae, pierdes una.",
+    cat: "ARCADE",
+    cover: "cover-arkanoid",
+    color: "magenta",
+    best: 0,
+    plays: "0",
+  },
+  {
     id: "ranaria",
     title: "RANARIA",
     short: "Cruza la autopista de pixeles.",
