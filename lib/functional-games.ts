@@ -1,5 +1,5 @@
 import { GAME_ENGINES } from "@/games/registry";
-import { CATS, GAMES, type Game, type GameCategory } from "@/lib/games";
+import { GAMES, type Game } from "@/lib/games";
 import { getRealGameIds } from "@/lib/leaderboard";
 
 // Solo servidor: usa `getRealGameIds()`, que lee `cookies()`. Con
@@ -15,13 +15,4 @@ export async function getFunctionalGames(): Promise<Game[]> {
 export async function isFunctionalGame(id: string): Promise<boolean> {
   const games = await getFunctionalGames();
   return games.some((game) => game.id === id);
-}
-
-// Categorías con al menos un juego, en el orden de CATS, precedidas por "TODOS".
-export function getCategories(games: Game[]): ["TODOS", ...GameCategory[]] {
-  const present = new Set(games.map((game) => game.cat));
-  const cats = CATS.filter(
-    (cat): cat is GameCategory => cat !== "TODOS" && present.has(cat),
-  );
-  return ["TODOS", ...cats];
 }

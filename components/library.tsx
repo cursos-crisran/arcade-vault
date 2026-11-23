@@ -2,20 +2,21 @@
 
 import { useMemo, useState } from "react";
 import { GameCard } from "@/components/game-card";
-import { CATS, GAMES } from "@/lib/games";
+import { getCategories, type Game } from "@/lib/games";
 
-export function Library() {
+export function Library({ games }: { games: Game[] }) {
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState<(typeof CATS)[number]>("TODOS");
+  const cats = useMemo(() => getCategories(games), [games]);
+  const [cat, setCat] = useState<(typeof cats)[number]>("TODOS");
 
   const filtered = useMemo(() => {
     const needle = q.toLowerCase();
-    return GAMES.filter(
+    return games.filter(
       (g) =>
         (cat === "TODOS" || g.cat === cat) &&
         g.title.toLowerCase().includes(needle),
     );
-  }, [q, cat]);
+  }, [games, q, cat]);
 
   return (
     <div className="fade-in">
@@ -36,7 +37,7 @@ export function Library() {
           />
         </div>
         <div className="av-chips">
-          {CATS.map((c) => (
+          {cats.map((c) => (
             <button
               key={c}
               className={"chip" + (cat === c ? " active" : "")}

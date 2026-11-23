@@ -142,6 +142,15 @@ export const CATS = ["TODOS", "ARCADE", "PUZZLE", "SHOOTER", "VERSUS"] as const 
   ...GameCategory[],
 ];
 
+// Categorías con al menos un juego, en el orden de CATS, precedidas por "TODOS".
+export function getCategories(games: Game[]): ["TODOS", ...GameCategory[]] {
+  const present = new Set(games.map((game) => game.cat));
+  const cats = CATS.filter(
+    (cat): cat is GameCategory => cat !== "TODOS" && present.has(cat),
+  );
+  return ["TODOS", ...cats];
+}
+
 export function getGame(id: string): Game | undefined {
   return GAMES.find((g) => g.id === id);
 }
