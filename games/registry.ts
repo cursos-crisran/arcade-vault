@@ -6,4 +6,5 @@ export const GAME_ENGINES: Record<
 > = {
   asteroides: () => import("./asteroides"),
   tetris: () => import("./tetris"),
+  arkanoid: () => import("./arkanoid"),
 };
