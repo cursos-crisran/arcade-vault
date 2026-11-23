@@ -1,11 +1,5 @@
 import { COLS, PIECES, ROWS, type Shape } from "./constants";
-
-export type Piece = {
-  type: number;
-  shape: Shape;
-  x: number;
-  y: number;
-};
+import type { Piece } from "./entities";
 
 export function createBoard(): number[][] {
   return Array.from({ length: ROWS }, () => new Array<number>(COLS).fill(0));
