@@ -1,6 +1,6 @@
 # SPEC 10 — Mostrar solo juegos funcionales en biblioteca, home y Salón de la Fama
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 02, SPEC 06, SPEC 07, SPEC 08, SPEC 09
 > **Date:** 2026-11-23
 > **Objective:** Mostrar en la biblioteca, el home y el Salón de la Fama (y permitir abrir por URL) únicamente los juegos que tienen fila en la tabla `games` de Supabase y motor registrado en `GAME_ENGINES`, y eliminar del catálogo las 8 entradas mock.
@@ -124,7 +124,7 @@ Antes de empezar, leer en `node_modules/next/dist/docs/01-app/` la guía de `cac
 - [ ] La sección "JUEGOS DISPONIBLES AHORA" del home muestra 3 tarjetas, todas con enlace a un juego funcional.
 - [ ] `/salon` muestra las pestañas `GLOBAL`, `ASTEROIDES`, `TETRIS` y `ARKANOID`, y ninguna otra.
 - [ ] Ninguna pestaña de `/salon` muestra filas falsas ni "TU MEJOR MARCA"; sin puntajes muestra "SIN PUNTUACIONES AÚN".
-- [ ] `/games/caida`, `/games/bloque-buster` y `/games/caida/jugar` responden 404.
+- [ ] `/games/caida`, `/games/bloque-buster` y `/games/caida/jugar` renderizan la página 404 (`notFound()` con `noindex`). El código HTTP de la petición puede ser 200: con `cacheComponents` la cabecera sale antes de resolver el `<Suspense>`.
 - [ ] `/games/asteroides`, `/games/tetris` y `/games/arkanoid` y sus rutas `/jugar` responden 200; guardar un puntaje sigue creando la fila en `scores`.
 - [ ] Quitar temporalmente `tetris` de `GAME_ENGINES` hace que TETRIS desaparezca de `/games`, del home y de las pestañas de `/salon`; al restaurarlo vuelve.
 - [ ] `grep -rn "seededScores\|persistScores" app components lib games` no devuelve resultados.
