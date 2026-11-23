@@ -1,6 +1,6 @@
 # SPEC 07 — Leaderboard por juego y global con tabla de juegos en Supabase
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 02, SPEC 04, SPEC 06
 > **Date:** 2026-11-23
 > **Objective:** Crear en Supabase las tablas `games` y `scores` (con `user_id` opcional) y conectarlas a un leaderboard por juego (top 10 en `/games/[id]`, top 20 en `/salon`) y a uno global en `/salon`, con el juego ASTEROIDES guardando sus puntajes reales.
