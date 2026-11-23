@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FeatureIcon } from "@/components/feature-icon";
 import { FloatingSilhouettes } from "@/components/floating-silhouettes";
 import { MiniCard } from "@/components/mini-card";
-import { GAMES } from "@/lib/games";
+import type { Game } from "@/lib/games";
 import {
   FAQ,
   FEATURES,
@@ -17,7 +17,7 @@ import { useReveal } from "@/lib/use-reveal";
 
 const TOP_CLASS = ["top1", "top2", "top3"];
 
-export function Home() {
+export function Home({ games }: { games: Game[] }) {
   useReveal();
   return (
     <div className="home fade-in">
@@ -83,7 +83,7 @@ export function Home() {
           <div className="section-rule"></div>
         </div>
         <div className="mini-rail">
-          {GAMES.slice(0, 6).map((g) => (
+          {games.slice(0, 6).map((g) => (
             <MiniCard key={g.id} game={g} />
           ))}
         </div>
