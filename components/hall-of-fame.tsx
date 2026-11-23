@@ -1,39 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useAuth } from "@/components/auth-provider";
-import { GAMES } from "@/lib/games";
-import { seededScores, type ScoreRow } from "@/lib/scores";
+import { useState } from "react";
+import type { Game } from "@/lib/games";
+import type { ScoreRow } from "@/lib/scores";
 
-const YELLOW_GLOW = "[text-shadow:0_0_6px_rgba(245,255,0,0.5)]";
 const GLOBAL_TAB = "global";
 
 // `game` solo se rellena en el global (juego donde se logró el puntaje).
 export type HallRow = ScoreRow & { game?: string };
 
 type Props = {
+  // Juegos funcionales: una pestaña por cada uno.
+  games: Game[];
   globalRows: HallRow[];
-  // Filas reales de Supabase por id de juego. Un juego sin clave es mock.
+  // Filas reales de Supabase por id de juego funcional.
   byGame: Record<string, HallRow[]>;
 };
 
-export function HallOfFame({ globalRows, byGame }: Props) {
-  const { user } = useAuth();
+export function HallOfFame({ games, globalRows, byGame }: Props) {
   const [tab, setTab] = useState(GLOBAL_TAB);
   const isGlobal = tab === GLOBAL_TAB;
-  const isReal = isGlobal || tab in byGame;
+  const rows: HallRow[] = isGlobal ? globalRows : (byGame[tab] ?? []);
 
-  const mockRows = useMemo(
-    () => (isReal ? [] : seededScores(tab.length * 23 + 7, 12)),
-    [tab, isReal],
-  );
-  const rows: HallRow[] = isGlobal ? globalRows : isReal ? byGame[tab] : mockRows;
-
-  const game = GAMES.find((g) => g.id === tab);
-  const showYou = !!user && !isReal && !!game && rows.length > 5;
-  const youRank = 8 + (tab.length % 4);
-  const youScore = showYou ? rows[5].score - 2400 : 0;
   const podium = [rows[1], rows[0], rows[2]] as (HallRow | undefined)[];
 
   return (
@@ -52,7 +41,7 @@ export function HallOfFame({ globalRows, byGame }: Props) {
         >
           GLOBAL
         </button>
-        {GAMES.map((g) => (
+        {games.map((g) => (
           <button
             key={g.id}
             className={"chip" + (tab === g.id ? " active" : "")}
@@ -104,26 +93,6 @@ export function HallOfFame({ globalRows, byGame }: Props) {
             <div className="dt">{r.date}</div>
           </div>
         ))}
-        {showYou && game && user && (
-          <>
-            <div className="tr you-label">
-              ▸ TU MEJOR MARCA EN {game.title}
-            </div>
-            <div
-              className="tr you"
-              style={{ animationDelay: `${rows.length * 50 + 50}ms` }}
-            >
-              <div className="rk text-[var(--yellow)]">
-                #{String(youRank).padStart(2, "0")}
-              </div>
-              <div className="pl text-[var(--yellow)]">{user.name}</div>
-              <div className={`sc text-[var(--yellow)] ${YELLOW_GLOW}`}>
-                {youScore.toLocaleString("es-ES")}
-              </div>
-              <div className="dt">11/05/2026</div>
-            </div>
-          </>
-        )}
       </div>
 
       <div className="mt-8 text-center">
