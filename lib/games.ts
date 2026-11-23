@@ -81,6 +81,17 @@ export const GAMES: Game[] = [
     plays: "15.6K",
   },
   {
+    id: "asteroides",
+    title: "ASTEROIDES",
+    short: "Destruye el campo de asteroides y sobrevive.",
+    long: "Pilota tu nave en un campo de asteroides. Rota, propulsa y dispara para partir las rocas en fragmentos cada vez más pequeños. Recoge el power-up 3x para disparar en abanico.",
+    cat: "SHOOTER",
+    cover: "cover-asteroides",
+    color: "cyan",
+    best: 0,
+    plays: "0",
+  },
+  {
     id: "ranaria",
     title: "RANARIA",
     short: "Cruza la autopista de pixeles.",
