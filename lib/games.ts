@@ -47,6 +47,17 @@ export const GAMES: Game[] = [
     best: 0,
     plays: "0",
   },
+  {
+    id: "snake",
+    title: "SNAKE",
+    short: "Come frutas, crece y no te muerdas la cola.",
+    long: "Guía a la serpiente por el tablero con las flechas o WASD. Cada fruta suma 10 puntos y la hace crecer; cada 5 frutas sube el nivel y la serpiente se acelera. Las paredes te devuelven por el lado opuesto, pero si te muerdes se acaba la partida: solo tienes una vida.",
+    cat: "ARCADE",
+    cover: "cover-snake",
+    color: "green",
+    best: 0,
+    plays: "0",
+  },
 ];
 
 export const CATS = ["TODOS", "ARCADE", "PUZZLE", "SHOOTER", "VERSUS"] as const satisfies readonly [
