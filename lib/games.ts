@@ -51,7 +51,7 @@ export const GAMES: Game[] = [
     id: "snake",
     title: "SNAKE",
     short: "Come frutas, crece y no te muerdas la cola.",
-    long: "Guía a la serpiente por el tablero con las flechas o WASD. Cada fruta suma 10 puntos y la hace crecer; cada 5 frutas sube el nivel y la serpiente se acelera. Las paredes te devuelven por el lado opuesto, pero si te muerdes pierdes una de tus 3 vidas.",
+    long: "Guía a la serpiente por el tablero con las flechas o WASD. Cada fruta suma 10 puntos y la hace crecer; cada 5 frutas sube el nivel y la serpiente se acelera. Las paredes te devuelven por el lado opuesto, pero si te muerdes se acaba la partida: solo tienes una vida.",
     cat: "ARCADE",
     cover: "cover-snake",
     color: "green",

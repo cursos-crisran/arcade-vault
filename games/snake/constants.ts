@@ -12,7 +12,7 @@ export const START_LENGTH = 3;
 export const START_CELL = { x: 10, y: 7 }; // cabeza; cuerpo hacia la izquierda
 export const START_DIR = { x: 1, y: 0 }; // dirección inicial: derecha
 
-export const LIVES = 3;
+export const LIVES = 1;
 export const FRUIT_POINTS = 10;
 export const FRUITS_PER_LEVEL = 5;
 

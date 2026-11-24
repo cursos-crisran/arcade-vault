@@ -16,7 +16,7 @@ Decisiones ya tomadas por el usuario, no se reabren:
 - Id oficial `snake`, título `SNAKE`. Es una **entrada nueva** en el catálogo. Categoría `ARCADE`, color de acento `green`.
 - Juego creado desde cero. El motor **no referencia** `references/`: `fruits.png` se copia a `public/games/snake/` y las coordenadas del atlas se portan a un módulo TypeScript propio dentro de `games/snake/`.
 - Movimiento por celda (paso discreto). Las paredes **atraviesan** (wrap): salir por un borde reaparece por el opuesto. Solo el propio cuerpo mata.
-- Mapeo a eventos: `onScore` = puntaje, `onLives` = vidas reales (inician en 3), `onLevel` = nivel que sube con las frutas comidas.
+- Mapeo a eventos: `onScore` = puntaje, `onLives` = vida única (inicia en 1; al perderla termina la partida), `onLevel` = nivel que sube con las frutas comidas.
 - Controles: **solo teclado**, flechas y WASD.
 - Arte: frutas pixel-art de la fila del medio del atlas; la serpiente se dibuja en canvas con estética pixel-art. Sin sonido.
 
@@ -26,7 +26,7 @@ Decisiones ya tomadas por el usuario, no se reabren:
 
 **In:**
 
-- Motor en `games/snake/` (TypeScript puro, sin React, sin dependencias): grilla, serpiente, frutas, cola de entradas, colisión con el propio cuerpo, vidas, puntaje, niveles con aceleración y HUD dibujado. Canvas lógico 800×600 (4:3).
+- Motor en `games/snake/` (TypeScript puro, sin React, sin dependencias): grilla, serpiente, frutas, cola de entradas, colisión con el propio cuerpo (muerte inmediata), vida única, puntaje, niveles con aceleración y HUD dibujado. Canvas lógico 800×600 (4:3).
 - Carga de `fruits.png` desde `public/games/snake/` (copiado desde `references/`, que no se modifica) y atlas de 22 frutas portado a `games/snake/sprites.ts`.
 - Registro en `games/registry.ts`: `snake: () => import("./snake")`.
 - Entrada en `lib/games.ts` y portada propia: reescribir `.cover-snake` en `app/globals.css` (hoy huérfana) con `/frontend-design`.
@@ -60,7 +60,7 @@ Entrada de catálogo (nuevo elemento de `GAMES` en `lib/games.ts`):
   id: "snake",
   title: "SNAKE",
   short: "Come frutas, crece y no te muerdas la cola.",
-  long: "Guía a la serpiente por el tablero con las flechas o WASD. Cada fruta suma 10 puntos y la hace crecer; cada 5 frutas sube el nivel y la serpiente se acelera. Las paredes te devuelven por el lado opuesto, pero si te muerdes pierdes una de tus 3 vidas.",
+  long: "Guía a la serpiente por el tablero con las flechas o WASD. Cada fruta suma 10 puntos y la hace crecer; cada 5 frutas sube el nivel y la serpiente se acelera. Las paredes te devuelven por el lado opuesto, pero si te muerdes se acaba la partida: solo tienes una vida.",
   cat: "ARCADE",
   cover: "cover-snake",
   color: "green",
@@ -93,7 +93,7 @@ export const COLS = 20;                  // 800 / 40
 export const ROWS = 14;                  // (600 - 40) / 40; tablero 800×560 con origen y = 40
 export const START_LENGTH = 3;
 export const START_CELL = { x: 10, y: 7 };   // cabeza; cuerpo hacia la izquierda; dirección inicial derecha
-export const LIVES = 3;
+export const LIVES = 1;
 export const FRUIT_POINTS = 10;
 export const FRUITS_PER_LEVEL = 5;
 export const BASE_STEP_MS = 150;         // intervalo entre pasos en nivel 1
@@ -109,22 +109,22 @@ Atlas de frutas (`sprites.ts`): portar las 22 entradas `{ x, y, w, h }` de la fi
 Reglas del juego:
 
 - Tablero de 20×14 celdas de 40 px bajo una franja de HUD de 40 px. Origen del tablero en `(0, HUD_H)`. Total 800×600 (4:3), sin deformación en `crt-screen`.
-- Inicio (y tras perder una vida): serpiente de 3 segmentos con la cabeza en `(10, 7)`, cuerpo en `(9, 7)` y `(8, 7)`, dirección derecha.
+- Inicio (y tras `restart()`): serpiente de 3 segmentos con la cabeza en `(10, 7)`, cuerpo en `(9, 7)` y `(8, 7)`, dirección derecha.
 - Un paso mueve la cabeza una celda en la dirección actual y el resto del cuerpo la sigue. El intervalo es `max(MIN_STEP_MS, BASE_STEP_MS - (level - 1) * STEP_DECREASE_MS)`: 150, 138, 126, 114, 102, 90, 78, 66 y 60 ms desde el nivel 9. Se acumula `dt` y se ejecuta como máximo un paso por frame.
 - Wrap: `x = (x + dx + COLS) % COLS`, `y = (y + dy + ROWS) % ROWS`.
 - Giros: flechas y WASD (`ArrowUp/Down/Left/Right`, `KeyW/A/S/D`). Un giro se encola solo si no es igual ni opuesto (180°) a la dirección vigente del último giro encolado; la cola admite 2 giros y se consume uno por paso.
 - Fruta: una sola a la vez, en una celda libre al azar, con un tipo al azar de `FRUIT_ATLAS`. Se dibuja escalada a 36 px de alto máximo conservando proporción y centrada en la celda.
-- Comer: si la nueva cabeza cae en la celda de la fruta, `score += 10`, la serpiente crece 1 segmento (la cola no se retira ese paso), `fruitsEaten++` y aparece otra fruta. `level = 1 + floor(fruitsEaten / 5)`; `fruitsEaten` no se reinicia al perder una vida.
-- Colisión: si la nueva cabeza cae en una celda del propio cuerpo (la punta de la cola cuenta como libre porque se retira en ese mismo paso), `lives--`. Con `lives > 0` la serpiente vuelve a su estado inicial, aparece una fruta nueva y se conservan puntaje, nivel y `fruitsEaten`. Con `lives == 0` termina la partida.
+- Comer: si la nueva cabeza cae en la celda de la fruta, `score += 10`, la serpiente crece 1 segmento (la cola no se retira ese paso), `fruitsEaten++` y aparece otra fruta. `level = 1 + floor(fruitsEaten / 5)`.
+- Colisión: si la nueva cabeza cae en una celda del propio cuerpo (la punta de la cola cuenta como libre porque se retira en ese mismo paso), `lives--`, que deja `lives == 0` y termina la partida de inmediato con `onGameOver`. No hay reinicio de la serpiente dentro de la misma partida.
 - Tablero lleno: si la serpiente ocupa las 280 celdas y no hay dónde colocar la fruta, la partida termina con `onGameOver`.
-- Puntaje máximo práctico: 277 frutas por vida × 3 vidas × 10 = 8 310 puntos, muy por debajo del tope de 10 000 000 de `submit_score`.
+- Puntaje máximo práctico: 277 frutas × 10 = 2 770 puntos, muy por debajo del tope de 10 000 000 de `submit_score`.
 
 Reglas de emisión de eventos (contrato `games/types.ts`):
 
-- `onScore`, `onLives`, `onLevel` solo al cambiar (más emisión inicial al crear y tras `restart()`: score 0, lives 3, level 1).
-- `onGameOver({ score, level })` una sola vez por partida, al perder la última vida o al llenar el tablero. A partir de ahí el estado `gameover` corta `update`, colisiones y teclas.
+- `onScore`, `onLives`, `onLevel` solo al cambiar (más emisión inicial al crear y tras `restart()`: score 0, lives 1, level 1).
+- `onGameOver({ score, level })` una sola vez por partida, al perder la única vida o al llenar el tablero. A partir de ahí el estado `gameover` corta `update`, colisiones y teclas.
 - El canvas no dibuja "GAME OVER" ni "PAUSA" ni reinicia por teclado; lo hace React con `restart()`.
-- HUD dibujado en la franja superior: `Score: N` a la izquierda, `Nivel: N` al centro y un icono de serpiente o corazón por vida a la derecha.
+- HUD dibujado en la franja superior: `Score: N` a la izquierda, `Nivel: N` al centro y un corazón por vida restante a la derecha (un solo corazón mientras la partida está en curso).
 - Teclas del juego con `preventDefault`: flechas y `KeyW/A/S/D`. `pause()` llama `input.reset()` (vacía la cola de giros).
 - `dt` capado a `MAX_DT` = 0.05 s.
 
@@ -141,7 +141,7 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/` (Client Components,
 5. **Registro.** Añadir `snake` a `GAME_ENGINES`. Verificación: `tsc`.
 6. **Catálogo y portada.** Entrada en `lib/games.ts` y reescritura de `.cover-snake` en `app/globals.css`. Verificación: `/games` lista el juego y `/games/snake` responde 200.
 7. **Base de datos.** Crear y aplicar la migración (`bunx supabase db push` o MCP `apply_migration`), luego `bun run db:types`. Verificación: `select * from games` incluye `snake`; `get_advisors` (security) sin errores nuevos.
-8. **Revisión manual.** Con `bun run dev`: jugar `/games/snake/jugar` completo (girar con flechas y WASD, intentar un giro de 180°, atravesar paredes, comer frutas, subir de nivel, morderse y perder una vida, perder las 3), pausar/reanudar, ver el modal, guardar puntaje, jugar de nuevo, salir y volver. Ver la fila en `scores` (`execute_sql`), `/games/snake` y `/salon` (GLOBAL y pestaña SNAKE). Confirmar que los demás juegos no cambian. Borrar filas de prueba de `scores`.
+8. **Revisión manual.** Con `bun run dev`: jugar `/games/snake/jugar` completo (girar con flechas y WASD, intentar un giro de 180°, atravesar paredes, comer frutas, subir de nivel, morderse y terminar la partida), pausar/reanudar, ver el modal, guardar puntaje, jugar de nuevo, salir y volver. Ver la fila en `scores` (`execute_sql`), `/games/snake` y `/salon` (GLOBAL y pestaña SNAKE). Confirmar que los demás juegos no cambian. Borrar filas de prueba de `scores`.
 9. **Cierre.** `bun run lint` y `bun run build` sin errores ni warnings.
 
 ---
@@ -158,11 +158,11 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/` (Client Components,
 - [ ] Cada 5 frutas comidas el nivel sube en 1 y el intervalo entre pasos baja 12 ms (150, 138, 126… hasta un mínimo de 60 ms).
 - [ ] Al cruzar un borde la serpiente reaparece por el borde opuesto sin morir.
 - [ ] Un giro de 180° se ignora; dos giros pulsados dentro de un mismo paso se aplican en pasos consecutivos.
-- [ ] Morderse el cuerpo resta una vida y reinicia la serpiente a 3 segmentos conservando puntaje y nivel; con 0 vidas aparece el modal.
+- [ ] Morderse el cuerpo termina la partida de inmediato (la única vida llega a 0) y aparece el modal con el puntaje y nivel alcanzados.
 - [ ] Puntaje, vidas y nivel del HUD de React coinciden con los del canvas.
 - [ ] `PAUSA` detiene el avance de la serpiente y `REANUDAR` continúa sin giros fantasma por teclas retenidas.
 - [ ] Al terminar aparece el modal de React una sola vez con el puntaje correcto; el canvas no dibuja "GAME OVER".
-- [ ] `JUGAR DE NUEVO` reinicia (puntaje 0, 3 vidas, nivel 1, serpiente inicial) sin duplicar bucle ni listeners (una pulsación de flecha gira una sola vez).
+- [ ] `JUGAR DE NUEVO` reinicia (puntaje 0, 1 vida, nivel 1, serpiente inicial) sin duplicar bucle ni listeners (una pulsación de flecha gira una sola vez).
 - [ ] Guardar puntaje crea fila en `scores` con `game_id = 'snake'` y `user_id` nulo.
 - [ ] `/games/snake` muestra top 10 real (una fila por `player_name`) y `/salon` muestra la pestaña SNAKE (top 20) y el juego aparece en GLOBAL.
 - [ ] Las flechas no hacen scroll; `destroy()` se ejecuta al salir y volver crea una sola instancia.
@@ -182,13 +182,13 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/` (Client Components,
 - **Sí:** solo la fila pixel-art del atlas (la única con coordenadas en `sprites.js`) y coherente con el HUD retro. **No:** las otras dos filas.
 - **Sí:** serpiente dibujada en canvas con formas, sin sprites. **No:** inventar un spritesheet de serpiente que el material de referencia no incluye.
 - **Sí:** movimiento discreto por celda, con wrap y muerte solo por el cuerpo. **No:** muerte por pared ni movimiento suave por píxeles.
-- **Sí:** 3 vidas reales; al perder una, la serpiente vuelve a 3 segmentos y se conservan puntaje y nivel. **No:** vida única ni reinicio de puntaje.
+- **Sí:** vida única; morderse termina la partida de inmediato. **No:** 3 vidas ni reinicio de la serpiente dentro de una partida.
 - **Sí:** nivel por frutas (cada 5) con piso de velocidad en 60 ms. **No:** aceleración sin tope, que volvería injugable el nivel alto.
 - **Sí:** tablero 20×14 con HUD de 40 px arriba, para llegar a 800×600 exactos (4:3). **No:** tablero de 20×15, que dejaría el HUD fuera del canvas o forzaría otra relación de aspecto.
 - **Sí:** cola de giros de 2 entradas sin 180°, para que dos pulsaciones rápidas no hagan morir a la serpiente contra sí misma. **No:** aplicar el giro inmediatamente sin cola.
 - **Sí:** solo teclado (flechas y WASD) sin sonido. **No:** ratón, táctil ni audio (no hay mp3 en la referencia).
 - **Sí:** el tablero lleno termina la partida con `onGameOver`. **No:** colgar el bucle sin celda libre.
-- **Sí:** el tope de 10 000 000 de `submit_score` es holgadísimo: el máximo práctico es 8 310.
+- **Sí:** el tope de 10 000 000 de `submit_score` es holgadísimo: el máximo práctico es 2 770.
 - **Sí:** entrada nueva `snake` con `best: 0` y `plays: "0"`. **No:** resucitar el mock `serpentina` eliminado en SPEC 10.
 - **Sí:** reescribir la clase huérfana `.cover-snake` como portada propia. **No:** dejarla tal cual, que fue pensada para el mock.
 - **Sí:** migración mínima (solo insertar en `games`). **No:** tocar vistas ni RLS.
@@ -210,7 +210,7 @@ Antes de empezar, leer `node_modules/next/dist/docs/01-app/` (Client Components,
 | `onGameOver` duplicado (colisión y tablero lleno en el mismo paso) | El estado `gameover` corta el resto del paso; emisión solo al transicionar |
 | Fruta generada sobre la serpiente o sin celda libre | Elegir solo entre celdas libres; si no hay ninguna, terminar la partida |
 | Canvas deformado por CSS | 800×600 ya es 4:3 |
-| Puntaje real mayor a 10 000 000 | Imposible: máximo práctico 8 310 |
+| Puntaje real mayor a 10 000 000 | Imposible: máximo práctico 2 770 |
 
 ---
 

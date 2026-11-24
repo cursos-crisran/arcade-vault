@@ -140,15 +140,8 @@ export const createGame: CreateGame = (canvas, events) => {
     // La punta de la cola cuenta como libre salvo que la serpiente crezca.
     const solid = eats ? snake : snake.slice(0, -1);
     if (solid.some((c) => c.x === next.x && c.y === next.y)) {
-      lives--;
-      if (lives > 0) {
-        syncEvents();
-        resetSnake();
-        spawnFruit();
-      } else {
-        lives = 0;
-        endGame();
-      }
+      lives = 0;
+      endGame();
       return;
     }
 
