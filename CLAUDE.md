@@ -38,7 +38,7 @@ Next 16.4.6 + React 19.3 (versiones posteriores a tu conocimiento previo). `AGEN
 - **Motores** (`games/`): un directorio por juego (`asteroides`, `tetris`, `arkanoid`, `snake`), TypeScript puro sin React. Contrato en `games/types.ts`: `createGame(canvas, events) → { pause, resume, restart, destroy }` con eventos `onScore`, `onLives`, `onLevel`, `onGameOver`. Registro en `games/registry.ts` (`GAME_ENGINES`, imports dinámicos). Un motor solo puede importar `../types`. Assets en `public/games/<id>/`; nunca referenciar `references/`.
 - **Supabase**: clientes en `lib/supabase/` (`client.ts`, `server.ts`, `proxy.ts`, `env.ts`, `database.types.ts`). Tablas `games` y `scores` (`user_id` opcional), vistas de leaderboard y función `submit_score` en `supabase/migrations/`. `lib/leaderboard.ts` lee; `lib/scores.ts` y `app/games/actions.ts` (`submitScore`, valida nombre 1–10 chars y puntaje entero) escriben. Cada juego nuevo añade una migración `<timestamp>_add_game_<id>.sql` con un `insert into public.games`. Proyecto Supabase conectado por MCP en `.mcp.json`.
 - **Variables de entorno**: ver `.env.example` (Resend y Supabase; `.env.local` no se commitea).
-- `references/` (juegos de arranque, templates, assets demo) es solo lectura: **nunca modificar**.
+- `references/` (juegos de arranque, templates, assets demo) es solo lectura: **nunca modificar**. Única excepción: `references/game-suggestions-todo.md` (memoria del agente `game-planner`).
 
 ## Flujo de desarrollo: Spec Driven Design
 
@@ -66,4 +66,4 @@ Reglas fijas:
 
 ## Agentes
 
-- `game-planner` (`.claude/agents/game-planner.md`): decide el próximo juego según diversidad de categorías, factibilidad en canvas 2D y reconocimiento clásico. Guarda sus sugerencias en `references/game-suggestions-todo.md`, única excepción editable dentro de `references/`.
+- `game-planner` (`.claude/agents/game-planner.md`): decide el próximo juego según diversidad de categorías, factibilidad en canvas 2D y reconocimiento clásico. Guarda sus sugerencias en `references/game-suggestions-todo.md`, única excepción editable dentro de `references/`. Flujo: invocar `game-planner` → elegir candidato → `/new-game <id>` → `/spec-impl`. Nunca escribe código ni specs.
