@@ -1,6 +1,6 @@
 # SPEC 11 — Juego SNAKE en canvas con leaderboard
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 02, SPEC 04, SPEC 06, SPEC 07, SPEC 10
 > **Date:** 2026-11-23
 > **Objective:** Crear desde cero el juego SNAKE como motor de canvas en `games/snake/`, con frutas tomadas de un atlas copiado a `public/games/snake/`, registrado en la plataforma con id `snake` y con leaderboard real en Supabase.
