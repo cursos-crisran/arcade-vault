@@ -63,3 +63,7 @@ Reglas fijas:
 
 - Usa siempre /frontend-desing para hacer interfaces de usuarios
 - En cada sesion siempre inicializa la skill de /caveman
+
+## Agentes
+
+- `game-planner` (`.claude/agents/game-planner.md`): decide el próximo juego según diversidad de categorías, factibilidad en canvas 2D y reconocimiento clásico. Guarda sus sugerencias en `references/game-suggestions-todo.md`, única excepción editable dentro de `references/`.
