@@ -67,3 +67,4 @@ Reglas fijas:
 ## Agentes
 
 - `game-planner` (`.claude/agents/game-planner.md`): decide el próximo juego según diversidad de categorías, factibilidad en canvas 2D y reconocimiento clásico. Guarda sus sugerencias en `references/game-suggestions-todo.md`, única excepción editable dentro de `references/`. Flujo: invocar `game-planner` → elegir candidato → `/new-game <id>` → `/spec-impl`. Nunca escribe código ni specs.
+- `game-jam` (`.claude/agents/game-jam.md`): independiente de `game-planner`. Recibe un tema, diseña 1 juego original y escribe 2+ specs complejas (motor + integración) en `specs/game-jam/<game-id>/` con el formato de SPEC 08/09/11, en estado `Borrador`. Solo escribe specs, nunca código. Flujo: invocar `game-jam` con un tema → revisar → mover a `specs/NN-...` → `/spec-impl`.
