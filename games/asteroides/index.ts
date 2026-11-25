@@ -1,18 +1,27 @@
 import type { CreateGame } from "../types";
 import { H, POINTS, POWERUP_DROP_CHANCE, POWERUP_DURATION, W } from "./constants";
-import { Asteroid, Bullet, Particle, PowerUp, Ship } from "./entities";
+import {
+  Asteroid,
+  Bullet,
+  Particle,
+  PowerUp,
+  Ship,
+  setDrawSkin,
+} from "./entities";
+import { DEFAULT_SKIN, SKINS } from "./skins";
 import { createInput } from "./input";
 import { dist, rand } from "./utils";
 
 type State = "playing" | "dead" | "gameover";
 
-export const createGame: CreateGame = (canvas, events) => {
+export const createGame: CreateGame = (canvas, events, options) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
   canvas.height = H;
 
   const input = createInput();
+  let skin = SKINS[options?.skin ?? DEFAULT_SKIN] ?? SKINS[DEFAULT_SKIN];
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   let ship = new Ship();
@@ -198,7 +207,7 @@ export const createGame: CreateGame = (canvas, events) => {
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(-Math.PI / 2);
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = skin.hud;
     ctx.lineWidth = 1.2;
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -212,7 +221,7 @@ export const createGame: CreateGame = (canvas, events) => {
   }
 
   function drawHUD(c: CanvasRenderingContext2D) {
-    c.fillStyle = "#fff";
+    c.fillStyle = skin.hud;
     c.font = "15px monospace";
 
     c.textAlign = "left";
@@ -225,22 +234,31 @@ export const createGame: CreateGame = (canvas, events) => {
 
     if (ship.tripleShot > 0) {
       c.textAlign = "left";
-      c.fillStyle = "#0ff";
+      c.fillStyle = skin.hudAccent;
       c.fillText(`3x  ${ship.tripleShot.toFixed(1)}s`, 14, 46);
     }
   }
 
   function draw(c: CanvasRenderingContext2D) {
-    c.fillStyle = "#000";
+    setDrawSkin(skin);
+    c.imageSmoothingEnabled = !skin.pixelated;
+    c.fillStyle = skin.bg;
     c.fillRect(0, 0, W, H);
 
+    c.save();
     particles.forEach((p) => p.draw(c));
     asteroids.forEach((a) => a.draw(c));
     powerUps.forEach((p) => p.draw(c));
     bullets.forEach((b) => b.draw(c));
     ship.draw(c);
+    c.restore();
 
     drawHUD(c);
+
+    if (skin.scanlines) {
+      c.fillStyle = "rgba(0,0,0,0.25)";
+      for (let y = 0; y < H; y += 3) c.fillRect(0, y, W, 1);
+    }
   }
 
   // ── Bucle principal ─────────────────────────────────────────────────────────
@@ -291,6 +309,12 @@ export const createGame: CreateGame = (canvas, events) => {
       emittedScore = emittedLives = emittedLevel = null;
       syncEvents();
       startLoop();
+    },
+    setSkin(id) {
+      if (destroyed || !SKINS[id]) return;
+      skin = SKINS[id];
+      // En pausa no hay bucle: redibuja para ver el cambio al instante.
+      if (paused && ctx) draw(ctx);
     },
     destroy() {
       if (destroyed) return;

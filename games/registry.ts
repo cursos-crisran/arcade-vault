@@ -12,7 +12,22 @@ export const GAME_ENGINES: Record<
 
 /** Skins por juego (sin importar el motor). Ausente = sin selector. */
 export const GAME_SKINS: Record<string, SkinOption[]> = {
+  asteroides: [
+    { id: "clasico", label: "Clásico" },
+    { id: "neon", label: "Neón" },
+    { id: "retro", label: "Retro" },
+  ],
+  arkanoid: [
+    { id: "clasico", label: "Clásico" },
+    { id: "neon", label: "Neón" },
+    { id: "retro", label: "Retro" },
+  ],
   tetris: [
+    { id: "clasico", label: "Clásico" },
+    { id: "neon", label: "Neón" },
+    { id: "retro", label: "Retro" },
+  ],
+  snake: [
     { id: "clasico", label: "Clásico" },
     { id: "neon", label: "Neón" },
     { id: "retro", label: "Retro" },

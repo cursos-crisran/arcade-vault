@@ -24,6 +24,7 @@ import {
   drawBlock,
   drawExplosion,
   drawPaddle,
+  setDrawSkin,
   type Ball,
   type Block,
   type Explosion,
@@ -31,15 +32,17 @@ import {
 } from "./entities";
 import { createInput } from "./input";
 import { LEVELS } from "./levels";
+import { DEFAULT_SKIN, SKINS } from "./skins";
 import { loadSpritesheet } from "./sprites";
 
 type State = "playing" | "gameover";
 
-export const createGame: CreateGame = (canvas, events) => {
+export const createGame: CreateGame = (canvas, events, options) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
   canvas.height = H;
+  let skin = SKINS[options?.skin ?? DEFAULT_SKIN] ?? SKINS[DEFAULT_SKIN];
 
   const bounceSound = new Audio(SOUND_BOUNCE_SRC);
   const breakSound = new Audio(SOUND_BREAK_SRC);
@@ -223,7 +226,7 @@ export const createGame: CreateGame = (canvas, events) => {
 
   // ── Dibujo ──────────────────────────────────────────────────────────────────
   function drawHud(c: CanvasRenderingContext2D) {
-    c.fillStyle = "#fff";
+    c.fillStyle = skin.hud;
     c.font = "bold 18px monospace";
     c.textAlign = "left";
     c.textBaseline = "top";
@@ -238,13 +241,19 @@ export const createGame: CreateGame = (canvas, events) => {
   }
 
   function draw(c: CanvasRenderingContext2D) {
-    c.fillStyle = "#000";
+    setDrawSkin(skin);
+    c.imageSmoothingEnabled = !skin.pixelated;
+    c.fillStyle = skin.bg;
     c.fillRect(0, 0, W, H);
     for (const b of blocks) drawBlock(c, b);
     for (const e of explosions) drawExplosion(c, e);
     drawPaddle(c, paddle);
     drawBall(c, ball);
     if (state === "playing") drawHud(c);
+    if (skin.scanlines) {
+      c.fillStyle = "rgba(0,0,0,0.25)";
+      for (let y = 0; y < H; y += 3) c.fillRect(0, y, W, 1);
+    }
   }
 
   // ── Bucle principal ─────────────────────────────────────────────────────────
@@ -301,6 +310,12 @@ export const createGame: CreateGame = (canvas, events) => {
       emittedScore = emittedLives = emittedLevel = null;
       syncEvents();
       startLoop();
+    },
+    setSkin(id) {
+      if (destroyed || !SKINS[id]) return;
+      skin = SKINS[id];
+      // En pausa no hay bucle: redibuja para ver el cambio al instante.
+      if (paused && ctx) draw(ctx);
     },
     destroy() {
       if (destroyed) return;
