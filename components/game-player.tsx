@@ -82,6 +82,13 @@ export function GamePlayer({ game }: { game: Game }) {
     };
   }, [game.id]);
 
+  // Clase `playing` en <html> mientras el reproductor está montado (anti-gestos).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("playing");
+    return () => root.classList.remove("playing");
+  }, []);
+
   // Pausa automática al perder visibilidad; el jugador reanuda con el botón.
   useEffect(() => {
     if (!ready || paused || over) return;
