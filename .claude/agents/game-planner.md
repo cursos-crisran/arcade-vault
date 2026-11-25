@@ -35,13 +35,19 @@ Es el único archivo que puedes escribir (excepción a la regla de solo lectura 
 # Sugerencias de juegos
 
 ## Implementados
-- [x] id (CAT)
+| id | Categoría |
+|----|-----------|
+| id | CAT |
 
 ## Pendientes
-- [ ] id — CAT — div/fact/clas = x/x/x — AAAA-MM-DD — motivo
+### CAT   (una subsección por categoría, ordenada por total descendente)
+| id | div | fact | clas | total | fecha | nota |
+|----|:---:|:----:|:----:|:-----:|-------|------|
+| id | x | x | x | **n** | AAAA-MM-DD | motivo |
 
 ## Descartados
-- id — AAAA-MM-DD — motivo
+| id | fecha | motivo |
+|----|-------|--------|
 ```
 
-Añade cada candidato nuevo a Pendientes, con la fecha. Mueve a Descartados lo que rechaces, con motivo.
+Añade cada candidato nuevo a Pendientes, en la tabla de su categoría, con la fecha. Mueve a Descartados lo que rechaces, con motivo.
