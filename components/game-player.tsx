@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { submitScore } from "@/app/games/actions";
 import { useAuth } from "@/components/auth-provider";
+import { TouchControls } from "@/components/touch-controls";
 import { GAME_ENGINES, GAME_SKINS } from "@/games/registry";
 import type { GameEngine, SkinId } from "@/games/types";
 import type { Game } from "@/lib/games";
@@ -80,6 +81,26 @@ export function GamePlayer({ game }: { game: Game }) {
       engineRef.current = null;
     };
   }, [game.id]);
+
+  // Clase `playing` en <html> mientras el reproductor está montado (anti-gestos).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("playing");
+    return () => root.classList.remove("playing");
+  }, []);
+
+  // Pausa automática al perder visibilidad; el jugador reanuda con el botón.
+  useEffect(() => {
+    if (!ready || paused || over) return;
+    const onVisibility = () => {
+      if (document.hidden) {
+        setPaused(true);
+        engineRef.current?.pause();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [ready, paused, over]);
 
   const changeSkin = (id: SkinId) => {
     setSkinState(id);
@@ -207,6 +228,8 @@ export function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
+
+      <TouchControls gameId={game.id} disabled={paused || over || !ready} />
 
       {over && (
         <div className="modal-bd">

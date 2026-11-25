@@ -699,6 +699,18 @@ a { color: inherit; text-decoration: none; }
   background: var(--green); box-shadow: 0 0 6px var(--green);
 }
 
+/* ===== bloqueo de gestos del navegador en el reproductor ===== */
+html.playing { overscroll-behavior: none; }
+.av-player { touch-action: manipulation; }
+.crt-screen canvas,
+.touch-btn {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* fake in-screen game */
 .game-arena {
   position: absolute; inset: 0;
@@ -964,6 +976,90 @@ a { color: inherit; text-decoration: none; }
   .av-hall { padding: 0 16px; }
   .av-detail { padding: 0 16px; margin: 24px auto; }
   .av-player { padding: 0 16px 32px; }
+}
+
+/* ===== controles táctiles (overlay bajo el canvas) ===== */
+.touch-controls {
+  display: flex; justify-content: space-between; gap: 16px;
+  margin-top: 16px;
+}
+.touch-group { flex: 1 1 0; display: flex; gap: 8px; min-width: 0; }
+.touch-btn {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 44px; min-height: 56px;
+  padding: 0 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--pixel); font-size: 11px; letter-spacing: 0.08em;
+  color: var(--ink);
+  background: rgba(0,245,255,0.05);
+  border: 1px solid var(--cyan);
+  box-shadow: inset 0 0 10px rgba(0,245,255,0.18);
+  cursor: pointer;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: transform 60ms ease, background 80ms, box-shadow 80ms;
+}
+.touch-btn:active {
+  transform: scale(0.94);
+  color: var(--cyan);
+  background: rgba(0,245,255,0.22);
+  box-shadow: inset 0 0 14px rgba(0,245,255,0.55);
+}
+.touch-btn:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+.touch-controls[data-disabled="true"] .touch-group { opacity: 0.35; }
+
+/* pantallas táctiles: objetivos de al menos 44 px */
+@media (pointer: coarse) {
+  .hud-actions .btn { min-height: 44px; min-width: 44px; }
+  .skin-picker select { min-height: 44px; }
+}
+
+/* móvil: reproductor a 360–430 px */
+@media (max-width: 720px) {
+  .av-player { margin: 16px auto; }
+  .player-hud { flex-direction: column; align-items: stretch; padding: 12px; gap: 12px; }
+  .hud-actions { flex-wrap: wrap; align-items: flex-end; }
+  .hud-actions .btn { flex: 1 1 auto; min-height: 44px; }
+  .skin-picker { flex: 1 1 100%; }
+  .skin-picker select { width: 100%; min-height: 44px; }
+  .crt { padding: 10px; border-radius: 16px; }
+  .crt-bottom { margin-top: 8px; padding: 0 2px; }
+  .crt-bottom span:nth-child(n+3) { display: none; }
+  .crt-bottom span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .touch-btn { font-size: 9px; letter-spacing: 0.04em; }
+  .modal { padding: 24px 16px; }
+  .modal h2 { font-size: 18px; }
+  .modal .final { font-size: 28px; }
+  .modal .input-row { flex-wrap: wrap; }
+  .modal .input-row input { flex: 1 1 140px; min-width: 0; }
+  .modal .input-row .btn { flex: 1 1 100%; min-height: 44px; }
+  .modal .actions .btn { min-height: 44px; }
+}
+
+/* horizontal bajo: canvas a la altura de la pantalla, controles a los lados */
+@media (orientation: landscape) and (max-height: 500px) {
+  .av-player { margin: 12px auto; padding-bottom: 12px; }
+  .player-hud { margin-bottom: 10px; padding: 8px 12px; }
+  .crt-screen {
+    max-height: calc(100dvh - 24px);
+    width: min(100%, calc((100dvh - 24px) * 4 / 3));
+    margin-inline: auto;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .av-player {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 12px;
+    align-items: center;
+  }
+  .player-hud { grid-column: 1 / -1; }
+  .crt { grid-column: 2; grid-row: 2; }
+  .touch-controls { display: contents; }
+  .touch-group { flex-direction: column; justify-content: center; width: 84px; }
+  .touch-group[data-side="left"] { grid-column: 1; grid-row: 2; }
+  .touch-group[data-side="right"] { grid-column: 3; grid-row: 2; }
+  .touch-btn { flex: 0 0 auto; min-height: 56px; }
 }
 
 /* misc */
