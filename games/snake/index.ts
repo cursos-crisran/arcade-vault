@@ -19,21 +19,26 @@ import {
   drawBoard,
   drawFruitEntity,
   drawHud,
+  drawScanlines,
   drawSnake,
+  setDrawSkin,
   type Cell,
   type Fruit,
   type Snake,
 } from "./entities";
 import { createInput, type Dir } from "./input";
+import { DEFAULT_SKIN, SKINS } from "./skins";
 import { FRUIT_ATLAS, loadFruits } from "./sprites";
 
 type State = "playing" | "gameover";
 
-export const createGame: CreateGame = (canvas, events) => {
+export const createGame: CreateGame = (canvas, events, options) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
   canvas.height = H;
+
+  let skin = SKINS[options?.skin ?? DEFAULT_SKIN] ?? SKINS[DEFAULT_SKIN];
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   let snake: Snake = [];
@@ -172,10 +177,13 @@ export const createGame: CreateGame = (canvas, events) => {
 
   // ── Dibujo ──────────────────────────────────────────────────────────────────
   function draw(c: CanvasRenderingContext2D) {
+    setDrawSkin(skin);
+    c.imageSmoothingEnabled = !skin.pixelated;
     drawBoard(c);
     if (fruit) drawFruitEntity(c, fruit);
     drawSnake(c, snake, dir);
     drawHud(c, score, level, lives);
+    drawScanlines(c);
   }
 
   // ── Bucle principal ─────────────────────────────────────────────────────────
@@ -231,6 +239,12 @@ export const createGame: CreateGame = (canvas, events) => {
       emittedScore = emittedLives = emittedLevel = null;
       syncEvents();
       startLoop();
+    },
+    setSkin(id) {
+      if (destroyed || !SKINS[id]) return;
+      skin = SKINS[id];
+      // Sin bucle activo (pausa o cargando): redibuja para ver el cambio.
+      if ((paused || !ready) && ctx) draw(ctx);
     },
     destroy() {
       if (destroyed) return;

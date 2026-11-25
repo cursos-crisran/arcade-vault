@@ -2,14 +2,22 @@ import {
   BOARD_X,
   BOARD_Y,
   CELL,
-  COLORS,
+  H,
   COLS,
   HUD_H,
   ROWS,
   W,
 } from "./constants";
 import type { Dir } from "./input";
+import { DEFAULT_SKIN, SKINS, type SnakeSkin } from "./skins";
 import { drawFruit } from "./sprites";
+
+let COLORS: SnakeSkin = SKINS[DEFAULT_SKIN];
+
+/** Skin activa para todas las funciones de dibujo. */
+export function setDrawSkin(skin: SnakeSkin): void {
+  COLORS = skin;
+}
 
 export type Cell = { x: number; y: number };
 /** Cuerpo de la serpiente: índice 0 = cabeza, último = cola. */
@@ -41,6 +49,11 @@ export function drawSnake(
   snake: Snake,
   dir: Dir,
 ): void {
+  ctx.save();
+  if (COLORS.glow > 0) {
+    ctx.shadowBlur = COLORS.glow;
+    ctx.shadowColor = COLORS.bodyA;
+  }
   // Cuerpo de cola a cabeza para que la cabeza quede encima.
   for (let i = snake.length - 1; i >= 1; i--) {
     const c = snake[i];
@@ -57,12 +70,14 @@ export function drawSnake(
   const hy = BOARD_Y + h.y * CELL;
   ctx.fillStyle = COLORS.bodyEdge;
   ctx.fillRect(hx + 1, hy + 1, CELL - 2, CELL - 2);
+  if (COLORS.glow > 0) ctx.shadowColor = COLORS.head;
   ctx.fillStyle = COLORS.head;
   ctx.fillRect(hx + 3, hy + 3, CELL - 6, CELL - 6);
 
   // Ojos: dos cuadrados a los lados de la dirección, adelantados hacia ella.
   const cx = hx + CELL / 2;
   const cy = hy + CELL / 2;
+  ctx.shadowBlur = 0;
   const fwd = 8;
   const side = 8;
   const eye = 6;
@@ -72,6 +87,7 @@ export function drawSnake(
     const ey = cy + dir.y * fwd + dir.x * side * s;
     ctx.fillRect(ex - eye / 2, ey - eye / 2, eye, eye);
   }
+  ctx.restore();
 }
 
 // Corazón pixel-art de 7×6 "píxeles".
@@ -121,4 +137,11 @@ export function drawHud(
     const x = W - 12 - (i + 1) * iconW - i * gap;
     drawHeart(ctx, x, midY - 9);
   }
+}
+
+/** Scanlines tipo CRT (solo si la skin las activa). */
+export function drawScanlines(ctx: CanvasRenderingContext2D): void {
+  if (!COLORS.scanlines) return;
+  ctx.fillStyle = "rgba(0,0,0,0.22)";
+  for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 2);
 }

@@ -5,10 +5,13 @@ import {
   drawBoard,
   drawGrid,
   drawPanel,
+  drawOverlay,
   drawPiece,
+  setDrawSkin,
   type Piece,
 } from "./entities";
 import { createInput } from "./input";
+import { DEFAULT_SKIN, SKINS } from "./skins";
 import { createBoard, randomPiece, rotateCW } from "./utils";
 
 type State = "playing" | "gameover";
@@ -16,13 +19,14 @@ type State = "playing" | "gameover";
 const dropIntervalFor = (level: number): number =>
   Math.max(100, 1000 - (level - 1) * 90);
 
-export const createGame: CreateGame = (canvas, events) => {
+export const createGame: CreateGame = (canvas, events, options) => {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas 2D no disponible");
   canvas.width = W;
   canvas.height = H;
 
   const input = createInput();
+  let skin = SKINS[options?.skin ?? DEFAULT_SKIN] ?? SKINS[DEFAULT_SKIN];
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   let board = createBoard();
@@ -212,12 +216,15 @@ export const createGame: CreateGame = (canvas, events) => {
 
   // ── Draw ────────────────────────────────────────────────────────────────────
   function draw(c: CanvasRenderingContext2D) {
+    setDrawSkin(skin);
+    c.imageSmoothingEnabled = !skin.pixelated;
     drawBackground(c);
     drawGrid(c);
     drawBoard(c, board);
     drawPiece(c, current, ghostY(), true);
     drawPiece(c, current);
     drawPanel(c, { score, lines, level, next });
+    drawOverlay(c);
   }
 
   // ── Bucle principal ─────────────────────────────────────────────────────────
@@ -268,6 +275,12 @@ export const createGame: CreateGame = (canvas, events) => {
       emittedScore = emittedLives = emittedLevel = null;
       syncEvents();
       startLoop();
+    },
+    setSkin(id) {
+      if (destroyed || !SKINS[id]) return;
+      skin = SKINS[id];
+      // En pausa no hay bucle: redibuja para ver el cambio al instante.
+      if (paused && ctx) draw(ctx);
     },
     destroy() {
       if (destroyed) return;

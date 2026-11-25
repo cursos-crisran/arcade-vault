@@ -4,11 +4,25 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { submitScore } from "@/app/games/actions";
 import { useAuth } from "@/components/auth-provider";
-import { GAME_ENGINES } from "@/games/registry";
-import type { GameEngine } from "@/games/types";
+import { GAME_ENGINES, GAME_SKINS } from "@/games/registry";
+import type { GameEngine, SkinId } from "@/games/types";
 import type { Game } from "@/lib/games";
 
 const LIVES = 3;
+const DEFAULT_SKIN: SkinId = "clasico";
+const skinKey = (id: string) => `arcade-vault:skin:${id}`;
+
+function readSkin(gameId: string): SkinId {
+  const options = GAME_SKINS[gameId] ?? [];
+  try {
+    const stored = window.localStorage.getItem(skinKey(gameId));
+    const found = options.find((o) => o.id === stored);
+    if (found) return found.id;
+  } catch {
+    // Sin storage: se usa la skin por defecto.
+  }
+  return DEFAULT_SKIN;
+}
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
@@ -24,6 +38,8 @@ export function GamePlayer({ game }: { game: Game }) {
   const [engineLives, setEngineLives] = useState(LIVES);
   const [engineLevel, setEngineLevel] = useState(1);
   const [ready, setReady] = useState(false);
+  const [skin, setSkinState] = useState<SkinId>(DEFAULT_SKIN);
+  const skinOptions = GAME_SKINS[game.id];
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GameEngine | null>(null);
@@ -38,6 +54,9 @@ export function GamePlayer({ game }: { game: Game }) {
 
     let cancelled = false;
     let engine: GameEngine | null = null;
+    // Storage solo en cliente (efecto), nunca en el render prerenderizado.
+    const initialSkin = readSkin(game.id);
+    setSkinState(initialSkin);
 
     GAME_ENGINES[game.id]().then(({ createGame }) => {
       if (cancelled) return;
@@ -50,7 +69,7 @@ export function GamePlayer({ game }: { game: Game }) {
           setEngineLevel(result.level);
           setOver(true);
         },
-      });
+      }, { skin: initialSkin });
       engineRef.current = engine;
       setReady(true);
     });
@@ -61,6 +80,17 @@ export function GamePlayer({ game }: { game: Game }) {
       engineRef.current = null;
     };
   }, [game.id]);
+
+  const changeSkin = (id: SkinId) => {
+    setSkinState(id);
+    engineRef.current?.setSkin?.(id);
+    try {
+      window.localStorage.setItem(skinKey(game.id), id);
+    } catch {
+      // Sin storage: la elección dura solo esta sesión.
+    }
+    canvasRef.current?.focus();
+  };
 
   const togglePause = () => {
     const next = !paused;
@@ -122,6 +152,22 @@ export function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         <div className="hud-actions">
+          {skinOptions && skinOptions.length > 1 && (
+            <div className="skin-picker">
+              <label htmlFor="skin-select">Skin</label>
+              <select
+                id="skin-select"
+                value={skin}
+                onChange={(e) => changeSkin(e.target.value as SkinId)}
+              >
+                {skinOptions.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button className="btn yellow" onClick={togglePause}>
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
@@ -140,6 +186,7 @@ export function GamePlayer({ game }: { game: Game }) {
             ref={canvasRef}
             width={800}
             height={600}
+            tabIndex={-1}
             className="block h-full w-full"
           />
           {!ready && <div className="crt-content">CARGANDO</div>}

@@ -38,7 +38,7 @@ Next 16.4.6 + React 19.3 (versiones posteriores a tu conocimiento previo). `AGEN
 - **Motores** (`games/`): un directorio por juego (`asteroides`, `tetris`, `arkanoid`, `snake`), TypeScript puro sin React. Contrato en `games/types.ts`: `createGame(canvas, events) → { pause, resume, restart, destroy }` con eventos `onScore`, `onLives`, `onLevel`, `onGameOver`. Registro en `games/registry.ts` (`GAME_ENGINES`, imports dinámicos). Un motor solo puede importar `../types`. Assets en `public/games/<id>/`; nunca referenciar `references/`.
 - **Supabase**: clientes en `lib/supabase/` (`client.ts`, `server.ts`, `proxy.ts`, `env.ts`, `database.types.ts`). Tablas `games` y `scores` (`user_id` opcional), vistas de leaderboard y función `submit_score` en `supabase/migrations/`. `lib/leaderboard.ts` lee; `lib/scores.ts` y `app/games/actions.ts` (`submitScore`, valida nombre 1–10 chars y puntaje entero) escriben. Cada juego nuevo añade una migración `<timestamp>_add_game_<id>.sql` con un `insert into public.games`. Proyecto Supabase conectado por MCP en `.mcp.json`.
 - **Variables de entorno**: ver `.env.example` (Resend y Supabase; `.env.local` no se commitea).
-- `references/` (juegos de arranque, templates, assets demo) es solo lectura: **nunca modificar**.
+- `references/` (juegos de arranque, templates, assets demo) es solo lectura: **nunca modificar**. Única excepción: `references/game-suggestions-todo.md` (memoria del agente `game-planner`).
 
 ## Flujo de desarrollo: Spec Driven Design
 
@@ -63,3 +63,9 @@ Reglas fijas:
 
 - Usa siempre /frontend-desing para hacer interfaces de usuarios
 - En cada sesion siempre inicializa la skill de /caveman
+
+## Agentes
+
+- `game-planner` (`.claude/agents/game-planner.md`): decide el próximo juego según diversidad de categorías, factibilidad en canvas 2D y reconocimiento clásico. Guarda sus sugerencias en `references/game-suggestions-todo.md`, única excepción editable dentro de `references/`. Flujo: invocar `game-planner` → elegir candidato → `/new-game <id>` → `/spec-impl`. Nunca escribe código ni specs.
+- `game-jam` (`.claude/agents/game-jam.md`): independiente de `game-planner`. Recibe un tema, diseña 1 juego original y escribe 2+ specs complejas (motor + integración) en `specs/game-jam/<game-id>/` con el formato de SPEC 08/09/11, en estado `Borrador`. Solo escribe specs, nunca código. Flujo: invocar `game-jam` con un tema → revisar → mover a `specs/NN-...` → `/spec-impl`.
+- `skin-designer` (`.claude/agents/skin-designer.md`): audita que todo juego tenga al menos 3 skins (`clasico` por defecto, `neon`, `retro`) y las implementa si faltan (`games/<id>/skins.ts`, `setSkin` en el contrato de `games/types.ts`) junto con el `<select>` de skins en `components/game-player.tsx`. **Sí escribe código** (no toca `references/` ni BD). Flujo: invocar `skin-designer` → revisar tabla juego × skin → probar `/games/<id>/jugar`.

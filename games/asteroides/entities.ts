@@ -6,7 +6,19 @@ import {
   TRIPLE_SPREAD,
   W,
 } from "./constants";
+import { SKINS, type AsteroidesSkin } from "./skins";
 import { rand, randInt, wrap } from "./utils";
+
+/** Skin activa para el dibujo (la fija el motor antes de cada frame). */
+let S: AsteroidesSkin = SKINS.clasico;
+export function setDrawSkin(skin: AsteroidesSkin) {
+  S = skin;
+}
+
+function glow(ctx: CanvasRenderingContext2D, color: string) {
+  ctx.shadowBlur = S.glow;
+  ctx.shadowColor = color;
+}
 
 // ── Bullet ────────────────────────────────────────────────────────────────────
 export class Bullet {
@@ -37,7 +49,8 @@ export class Bullet {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = S.bullet;
+    glow(ctx, S.bullet);
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
@@ -99,7 +112,8 @@ export class Asteroid {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = S.asteroid;
+    glow(ctx, S.asteroid);
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
     ctx.beginPath();
@@ -147,12 +161,13 @@ export class PowerUp {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(Math.PI / 4);
-    ctx.strokeStyle = "#0ff";
+    ctx.strokeStyle = S.powerUp;
+    glow(ctx, S.powerUp);
     ctx.lineWidth = 2;
     const r = this.radius * pulse;
     ctx.strokeRect(-r, -r, r * 2, r * 2);
     ctx.restore();
-    ctx.fillStyle = "#0ff";
+    ctx.fillStyle = S.powerUp;
     ctx.font = "bold 12px monospace";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -243,7 +258,8 @@ export class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = S.ship;
+    glow(ctx, S.ship);
     ctx.lineWidth = 1.5;
     ctx.lineJoin = "round";
 
@@ -262,7 +278,8 @@ export class Ship {
       ctx.moveTo(-8, -4);
       ctx.lineTo(-8 - rand(6, 14), 0);
       ctx.lineTo(-8, 4);
-      ctx.strokeStyle = "rgba(255, 130, 0, 0.85)";
+      ctx.strokeStyle = S.thrust;
+      ctx.shadowColor = S.thrust;
       ctx.stroke();
     }
 
@@ -301,7 +318,7 @@ export class Particle {
 
   draw(ctx: CanvasRenderingContext2D) {
     const alpha = this.ttl / this.life;
-    ctx.strokeStyle = `rgba(255,255,255,${alpha.toFixed(2)})`;
+    ctx.strokeStyle = `rgba(${S.particleRgb},${alpha.toFixed(2)})`;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);

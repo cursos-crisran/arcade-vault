@@ -1,18 +1,23 @@
 import {
-  BG_COLOR,
   BLOCK,
   BOARD_X,
   BOARD_Y,
-  COLORS,
   COLS,
   GHOST_ALPHA,
-  GRID_COLOR,
   H,
   PANEL_X,
   ROWS,
   W,
   type Shape,
 } from "./constants";
+import { DEFAULT_SKIN, SKINS, type TetrisSkin } from "./skins";
+
+let skin: TetrisSkin = SKINS[DEFAULT_SKIN];
+
+/** Skin usada por las funciones de dibujo (se fija antes de cada frame). */
+export function setDrawSkin(next: TetrisSkin): void {
+  skin = next;
+}
 
 export type Piece = {
   type: number;
@@ -31,8 +36,6 @@ export type PanelData = {
 const FONT_LABEL = '12px "Press Start 2P", monospace';
 const FONT_VALUE = '20px "Press Start 2P", monospace';
 const FONT_CONTROLS = '12px "Courier New", monospace';
-const LABEL_COLOR = "#8a8aa0";
-const VALUE_COLOR = "#f0f0f8";
 
 const CONTROLS = [
   "← →   MOVER",
@@ -50,23 +53,28 @@ export function drawBlock(
   size: number = BLOCK,
   alpha = 1,
 ): void {
-  const color = COLORS[colorIndex];
+  const color = skin.pieces[colorIndex];
   if (!colorIndex || !color) return;
   ctx.globalAlpha = alpha;
   ctx.fillStyle = color;
+  if (skin.glow) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = skin.glow;
+  }
   ctx.fillRect(px + 1, py + 1, size - 2, size - 2);
-  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = skin.highlight;
   ctx.fillRect(px + 1, py + 1, size - 2, 4);
   ctx.globalAlpha = 1;
 }
 
 export function drawBackground(ctx: CanvasRenderingContext2D): void {
-  ctx.fillStyle = BG_COLOR;
+  ctx.fillStyle = skin.bg;
   ctx.fillRect(0, 0, W, H);
 }
 
 export function drawGrid(ctx: CanvasRenderingContext2D): void {
-  ctx.strokeStyle = GRID_COLOR;
+  ctx.strokeStyle = skin.grid;
   ctx.lineWidth = 0.5;
   ctx.beginPath();
   for (let c = 1; c < COLS; c++) {
@@ -117,10 +125,10 @@ function drawStat(
   y: number,
 ): void {
   ctx.textBaseline = "top";
-  ctx.fillStyle = LABEL_COLOR;
+  ctx.fillStyle = skin.labelColor;
   ctx.font = FONT_LABEL;
   ctx.fillText(label, PANEL_X, y);
-  ctx.fillStyle = VALUE_COLOR;
+  ctx.fillStyle = skin.valueColor;
   ctx.font = FONT_VALUE;
   ctx.fillText(value, PANEL_X, y + 22);
 }
@@ -135,10 +143,10 @@ export function drawPanel(
 
   // NEXT: cuadrícula de 4×4 bloques (120×120)
   const boxY = 290;
-  ctx.fillStyle = LABEL_COLOR;
+  ctx.fillStyle = skin.labelColor;
   ctx.font = FONT_LABEL;
   ctx.fillText("NEXT", PANEL_X, 262);
-  ctx.strokeStyle = GRID_COLOR;
+  ctx.strokeStyle = skin.grid;
   ctx.lineWidth = 1;
   ctx.strokeRect(PANEL_X, boxY, 4 * BLOCK, 4 * BLOCK);
   const { shape } = next;
@@ -154,10 +162,17 @@ export function drawPanel(
       );
 
   // CONTROLES
-  ctx.fillStyle = LABEL_COLOR;
+  ctx.fillStyle = skin.labelColor;
   ctx.font = FONT_LABEL;
   ctx.fillText("CONTROLES", PANEL_X, 436);
   ctx.font = FONT_CONTROLS;
-  ctx.fillStyle = VALUE_COLOR;
+  ctx.fillStyle = skin.valueColor;
   CONTROLS.forEach((line, i) => ctx.fillText(line, PANEL_X, 466 + i * 22));
+}
+
+/** Scanlines CRT (solo skins con `scanlines`). */
+export function drawOverlay(ctx: CanvasRenderingContext2D): void {
+  if (!skin.scanlines) return;
+  ctx.fillStyle = "rgba(0,0,0,0.22)";
+  for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
 }

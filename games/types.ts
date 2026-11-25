@@ -17,9 +17,24 @@ export type GameEngine = {
   restart: () => void;
   /** Cancela el rAF y quita los listeners de window. */
   destroy: () => void;
+  /** Cambia la skin en caliente sin reiniciar la partida (opcional). */
+  setSkin?: (id: SkinId) => void;
 };
+
+export type SkinId = "clasico" | "neon" | "retro";
+
+export type Skin = {
+  id: SkinId;
+  /** Etiqueta visible en el selector. */
+  label: string;
+};
+
+export type SkinOption = { id: SkinId; label: string };
+
+export type CreateGameOptions = { skin?: SkinId };
 
 export type CreateGame = (
   canvas: HTMLCanvasElement,
   events: GameEvents,
+  options?: CreateGameOptions,
 ) => GameEngine;
